@@ -2,15 +2,14 @@ import { useEffect, useState } from 'react'
 import './App.css'
 import axios from "axios"
 import { useAuth0 } from '@auth0/auth0-react';
+import ProgressPage from './views/ProgressPage';
 
-// Define the expected user shape coming from the API
 type User = {
   username: string
   email: string
 }
 
 function App() {
-  // Explicitly type users as User[]
   const [users, setUsers] = useState<User[]>([])
   const { isAuthenticated,getAccessTokenSilently } = useAuth0();
 
@@ -49,6 +48,7 @@ function App() {
     <>
       <div>
         <h2>User List</h2>
+        <ProgressPage />
         <ul>
           {users.map((user) => (
             <li key={user.username}>{user.username}</li>
