@@ -1,5 +1,4 @@
 # backend/platform/views/watch.py
-
 from datetime import datetime
 from django.urls import path
 from django.http import JsonResponse
@@ -13,18 +12,9 @@ from ..utils.formatters import Formatter, _iter_tags
 
 
 @api_view(["GET"])
-@permission_classes([AllowAny])  # public route; premium is enforced inside
+@permission_classes([AllowAny])
 def get_video(request, video_id: str):
-    """
-    Get a single video's details. Accepts either:
-      - numeric primary key (e.g. /api/video/1), or
-      - on-platform id string (e.g. /api/video/dQw4w9WgXcQ)
-
-    Premium videos are still blocked for non-premium users with 401.
-    """
     include_related = (request.GET.get("related", "true").lower() == "true")
-
-    # use session user dict or anonymous
     user = request.session.get("user") or db.User.anonymous().to_dict()
 
     with db.connect_context() as conn:
@@ -32,40 +22,31 @@ def get_video(request, video_id: str):
         if not video:
             return JsonResponse({"error": "Video not found"}, status=404)
 
-        # premium gate
         if getattr(video, "premium", False) and not user.get("premium"):
             return JsonResponse({"error": "Unauthorized"}, status=401)
 
-        # tags (works with ORM manager or legacy)
         tags = _iter_tags(conn, video)
-
-        # collect related videos from tags
         related = []
         if include_related and tags:
             id2related = {}
             for t in tags:
-                # Legacy style: tag.all_videos(conn, uid=...)
                 all_videos = getattr(t, "all_videos", None)
                 if callable(all_videos):
                     try:
                         for v in all_videos(conn, uid=user["id"]):
                             id2related[getattr(v, "id", None)] = v
                     except TypeError:
-                        # if legacy signature differs
                         for v in all_videos(conn):
                             id2related[getattr(v, "id", None)] = v
                 else:
-                    # Django ORM reverse M2M: t.videos.all()
                     vids_mgr = getattr(t, "videos", None)
                     if hasattr(vids_mgr, "all"):
                         for v in vids_mgr.all():
                             id2related[getattr(v, "id", None)] = v
             related = list(id2related.values())
 
-        # format response
         ret = Formatter.video_detail(conn, video, tags, related_videos=related)
 
-        # channel name (prefer ORM if available, else mapping)
         channel_name = None
         if getattr(video, "channel", None) and getattr(video.channel, "name", None):
             channel_name = video.channel.name
@@ -79,18 +60,8 @@ def get_video(request, video_id: str):
 
 
 @api_view(["POST"])
-@permission_classes([AllowAny])  # mirrors Flask: anonymous posts are accepted (no-op if anon)
+@permission_classes([AllowAny])
 def watchtime_update(request):
-    """
-    Log watch time for a user. Anonymous users are accepted but do nothing.
-    Body:
-      {
-        "videoId": <id or youtube id>,
-        "lastVideoTime": <seconds>,
-        "elapsedTime": <seconds>,
-        "timezone": "Europe/Dublin"
-      }
-    """
     data = request.data or {}
     user = request.session.get("user") or db.User.anonymous().to_dict()
 
@@ -106,12 +77,10 @@ def watchtime_update(request):
 
     t_start = t_end - elapsed
 
-    # timezone
     tzstring = data.get("timezone", "UTC")
     tzfile = tz.gettz(tzstring) or tz.gettz("UTC")
     now = datetime.now().astimezone(tzfile)
 
-    # anonymous: do nothing (keeps parity with original behavior)
     if user.get("id", -1) == -1:
         return Response({})
 
@@ -121,7 +90,6 @@ def watchtime_update(request):
 
 
 urlpatterns = [
-    # accept numeric PK or string YouTube id
     path("video/<str:video_id>", get_video),
     path("watchtime/update", watchtime_update),
 ]

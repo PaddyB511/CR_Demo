@@ -2,21 +2,12 @@
 from ..services import db
 
 def _iter_tags(conn, video):
-    """
-    Works with:
-      - old Flask-style: callable video.tags(conn)
-      - Django ORM: video.tags.all()
-      - stub: empty list
-    """
     tags_attr = getattr(video, "tags", None)
-    # method-style (Flask-era)
     if callable(tags_attr):
         try:
             return list(tags_attr(conn))
         except TypeError:
-            # callable but no conn expected
             return list(tags_attr())
-    # Django ORM manager-style
     if hasattr(tags_attr, "all"):
         return list(tags_attr.all())
     return []
@@ -31,6 +22,7 @@ def _iter_speakers(conn, video):
     if hasattr(speakers_attr, "all"):
         return list(speakers_attr.all())
     return []
+
 
 class Formatter:
     @classmethod
@@ -47,12 +39,8 @@ class Formatter:
             "level": getattr(video, "level", "Beginner"),
             "premium": getattr(video, "premium", False),
         }
-        d.pop("onPlatformId", None)  # hide in simple view
-
-        # channel name (works with FK or raw id)
-        channel_id = getattr(video, "channel_id", None)
-        if channel_id is None and getattr(video, "channel", None):
-            channel_id = video.channel.id
+        d.pop("onPlatformId", None)
+        channel_id = getattr(video, "channel_id", None) or getattr(getattr(video, "channel", None), "id", None)
         cid2cname = {c.id: c.name for c in db.Channel.all(conn)}
         return {
             **d,
@@ -75,16 +63,10 @@ class Formatter:
             "level": getattr(video, "level", "Beginner"),
             "premium": getattr(video, "premium", False),
         }
-
-        # trim description
         desc = d.get("description")
         if desc and len(desc) > 300:
             d["description"] = desc[:300] + "..."
-
-        # fallback to pulling tags if not provided
-        if tags is None:
-            tags = _iter_tags(conn, video)
-
+        tags = tags if tags is not None else _iter_tags(conn, video)
         ret = {
             "video": {
                 **d,
@@ -93,13 +75,14 @@ class Formatter:
                 "tags": [getattr(t, "name", str(t)) for t in tags],
             }
         }
-
         if related_videos is not None:
-            # Put the current one first if present
             try:
-                related_videos = sorted(related_videos, key=lambda v: getattr(v, "id", None) == getattr(video, "id", None), reverse=True)
+                related_videos = sorted(
+                    related_videos,
+                    key=lambda v: getattr(v, "id", None) == getattr(video, "id", None),
+                    reverse=True,
+                )
             except Exception:
                 pass
             ret["relatedVideos"] = [cls.video_simple(conn, v) for v in related_videos]
-
         return ret
