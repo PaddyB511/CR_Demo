@@ -1,36 +1,44 @@
 import Card from "./Card";
+import LevelBadge from "./LevelBadge";
 import LinearProgress from "./LinearProgress";
 
 const LevelCard = () => {
   return (
-    <Card title="My level">
+    <Card title="My level" className="h-[280px]">
       <div className="flex items-start justify-between">
-        <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-full bg-green-500 grid place-items-center text-white">
-            ★
-          </div>
-          <div>
-            <div className="text-sm text-gray-500">My level</div>
-            <div className="text-lg font-semibold">Beginner 1</div>
+        {/* Left Section: Badge and Level Info */}
+        <div className="flex items-center gap-3">
+          <LevelBadge value={1} />
+          <div className="flex flex-col items-start">
+            <div className="text-sm text-[#D9D9D9] font-inter font-bold">
+              My level
+            </div>
+            <div className="text-lg font-bold text-black">Beginner 1</div>
           </div>
         </div>
+
+        {/* Right Section: Hours to Next Level */}
         <div className="text-xs text-gray-400 text-right">
-          <div>
-            <span className="text-green-600 font-medium">21 hours</span> to the
+          <div className="text-[#C2C2C2] text-[13px] leading-[16px] text-right font-inter font-semibold">
+            <span className="text-[#7AC431] font-bold">21 hours</span> to the
             next level
           </div>
-          <button className="underline">Change level</button>
+          <button className="underline text-gray-400 hover:text-gray-500">
+            Change level
+          </button>
         </div>
       </div>
-      <div className="mt-4">
+
+      {/* Divider */}
+      <hr className="my-8 border-t border-gray-200" />
+
+      {/* Progress Bar */}
+      <div className="mt-2">
         <LinearProgress percent={28} />
-        <div className="mt-3 text-sm text-gray-600">
+        <div className="mt-3 text-sm text-black text-left">
           Here is a short description of the level, in one or two sentences. We
           already know how to do this! Cool!
         </div>
-      </div>
-      <div className="absolute -mt-6 right-6 text-sm text-green-600 font-semibold">
-        28%
       </div>
     </Card>
   );
