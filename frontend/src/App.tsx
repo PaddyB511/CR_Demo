@@ -27,7 +27,7 @@ function App() {
       if (!isAuthenticated) {
         return;
       }
-    const accessToken = await getAccessTokenSilently({
+      const accessToken = await getAccessTokenSilently({
         authorizationParams: {
           audience: `https://cr/api/`,
           // scope: "read:current_user",
@@ -35,29 +35,32 @@ function App() {
       });
 
       console.log("Access Token:", accessToken);
-    axios.get('/api/users/', {
-      headers: {
-        Authorization: `Bearer ${accessToken}`
-      }
-    })
-      .then((response) => {
-        // DRF may return either a list (simple view) or a paginated object { results: [...] }
-        const data = Array.isArray(response.data)
-          ? response.data
-          : (response.data && Array.isArray(response.data.results) ? response.data.results : [])
-        setUsers(data)
-      })
-      .catch((error) => console.error('Error fetching users:', error))
-    }
+      axios
+        .get("/api/users/", {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        })
+        .then((response) => {
+          // DRF may return either a list (simple view) or a paginated object { results: [...] }
+          const data = Array.isArray(response.data)
+            ? response.data
+            : response.data && Array.isArray(response.data.results)
+            ? response.data.results
+            : [];
+          setUsers(data);
+        })
+        .catch((error) => console.error("Error fetching users:", error));
+    };
     getUsers();
-  }, [isAuthenticated])
+  }, [isAuthenticated]);
 
   return (
     <>
       {/* Temporary: show Browse page for development */}
       <BrowsePage />
     </>
-  )
+  );
 }
 
-export default App
+export default App;

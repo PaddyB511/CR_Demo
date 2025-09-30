@@ -1,5 +1,9 @@
 <svg width="199" height="187" viewBox="0 0 199 187" fill="none" xmlns="http://www.w3.org/2000/svg">
+<<<<<<< HEAD
 <circle cx="99.5" cy="114.5" r="96.5" fill="#FFFFFF" stroke="#252525" stroke-width="6"/>
+=======
+<circle cx="99.5" cy="114.5" r="96.5" fill="#F8F8F8" stroke="#252525" stroke-width="6"/>
+>>>>>>> 6b6f4bd0e5c6d7d05b735df8fb51e9dc70b6253a
 <path d="M80 10C80 4.47715 84.4772 0 90 0H111C116.523 0 121 4.47715 121 10V18H80V10Z" fill="#252525"/>
 <circle cx="99.5" cy="114.5" r="6.5" fill="#252525"/>
 <path d="M100 114.5L49.5 143" stroke="#252525" stroke-width="3"/>

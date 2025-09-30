@@ -7,44 +7,21 @@ import Chip from "./Chip";
 import SegBar from "./SegBar";
 import MiniBar from "./MiniBar";
 import Gauge from "./Gauge";
+import LevelCard from "./LevelCard";
+import TotalInputCard from "./TotalInputCard";
+import DailyGoalProgress from "./DailyGoalProgress";
 
 const Dashboard: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <TopNav />
-      <div className="max-w-[1100px] mx-auto px-4 pb-16">
+      <div className="w-full max-w-none px-4 pb-16">
         <RedBanner />
-
         {/* Row 1 */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-4">
-          <Card title="My level">
-            <div className="flex items-start justify-between">
-              <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-full bg-green-500 grid place-items-center text-white">★</div>
-                <div>
-                  <div className="text-sm text-gray-500">My level</div>
-                  <div className="text-lg font-semibold">Beginner 1</div>
-                </div>
-              </div>
-              <div className="text-xs text-gray-400 text-right">
-                <div><span className="text-green-600 font-medium">21 hours</span> to the next level</div>
-                <button className="underline">Change level</button>
-              </div>
-            </div>
-            <div className="mt-4">
-              <LinearProgress percent={28} />
-              <div className="mt-3 text-sm text-gray-600">Here is a short description of the level, in one or two sentences. We already know how to do this! Cool!</div>
-            </div>
-            <div className="absolute -mt-6 right-6 text-sm text-green-600 font-semibold">28%</div>
-          </Card>
+          <LevelCard />
 
-          <Card title="Daily Goal" className="bg-green-50">
-            <SemiCircle percent={33} />
-            <div className="mt-2 flex items-center justify-center gap-3">
-              <Chip color="bg-white text-gray-700 border border-gray-200">New record: 7 days</Chip>
-              <button className="w-8 h-8 rounded-full bg-white border border-gray-200 grid place-items-center">✎</button>
-            </div>
-          </Card>
+          <DailyGoalProgress current={45} goal={60} />
 
           <Card title="Your activity">
             <div className="flex items-center justify-between mb-4">
@@ -66,12 +43,7 @@ const Dashboard: React.FC = () => {
 
         {/* Row 2 */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-4">
-          <Card title="Total Input">
-            <div className="text-rose-600 font-bold">28 hrs 28 min</div>
-            <div className="mt-2 text-sm text-gray-600">Tell us how much input you have received outside of Comprehensible Russian to see your real progress!</div>
-            <div className="mt-4"><Gauge percent={55} /></div>
-            <div className="mt-4"><button className="text-xs bg-gray-100 hover:bg-gray-200 rounded-full px-3 py-1">Add off-platform hrs</button></div>
-          </Card>
+          <TotalInputCard/>
 
           <Card title="My journal" className="lg:col-span-2">
             <div className="grid grid-cols-1 md:grid-cols-2">
