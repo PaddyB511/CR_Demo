@@ -1,5 +1,88 @@
 @import "tailwindcss";
 
+/* Design tokens via CSS variables (compatible with Tailwind v4 build) */
+:root {
+  /* Typography */
+  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI",
+    Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji",
+    "Segoe UI Emoji";
+
+  /* Brand + UI Colors */
+  --color-brand: #db0000; /* Brand red */
+  --color-page: #f6f6f6; /* Page bg */
+  --color-surface: #ffffff; /* Card bg */
+  --color-surface-muted: #f6f6f6; /* Muted inputs/search */
+  --color-border: #e5e7eb; /* Light border */
+
+  /* Selected tag look */
+  --color-chip-selected: #fdf0f0; /* Selected chip bg */
+  --color-chip-selected-border: #f7acac; /* Selected chip border/accent */
+
+  /* Level chips */
+  --color-inter2: #ff7a21; /* Intermediate 2 bg */
+  --color-inter2-foreground: #ffffff; /* Intermediate 2 text */
+
+  /* Text grays */
+  --color-gray-700: #374151;
+  --color-gray-500: #6b7280;
+  --color-gray-400: #9ca3af;
+
+  /* Radii */
+  --radius-card: 20px; /* Large cards */
+  --radius-card-sm: 14px; /* Smaller cards */
+  --radius-pill: 96px; /* Chips (from Figma ~96px) */
+
+  /* Shadows */
+  --shadow-card: 0 1px 2px 0 rgb(16 24 40 / 0.05);
+}
+
+/* Utility classes mapping to tokens */
+.bg-page {
+  background-color: var(--color-page) !important;
+}
+.bg-surface {
+  background-color: var(--color-surface) !important;
+}
+.bg-surface-muted {
+  background-color: var(--color-surface-muted) !important;
+}
+.bg-chip-selected {
+  background-color: var(--color-chip-selected) !important;
+}
+.border-border {
+  border-color: var(--color-border) !important;
+}
+.border-brand {
+  border-color: var(--color-brand) !important;
+}
+.border-chip-selected {
+  border-color: var(--color-chip-selected-border) !important;
+}
+.text-brand {
+  color: var(--color-brand) !important;
+}
+.bg-brand {
+  background-color: var(--color-brand) !important;
+}
+.bg-inter2 {
+  background-color: var(--color-inter2) !important;
+}
+.text-inter2-foreground {
+  color: var(--color-inter2-foreground) !important;
+}
+.rounded-card {
+  border-radius: var(--radius-card) !important;
+}
+.rounded-card-sm {
+  border-radius: var(--radius-card-sm) !important;
+}
+.rounded-pill {
+  border-radius: var(--radius-pill) !important;
+}
+.shadow-card {
+  box-shadow: var(--shadow-card) !important;
+}
+
 :root {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
@@ -24,12 +107,12 @@ a:hover {
   color: #535bf2;
 }
 
+html,
 body {
   margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
+  padding: 0;
+  width: 100%;
+  height: 100%;
 }
 
 h1 {
@@ -38,13 +121,13 @@ h1 {
 }
 
 button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
+  /* border-radius: 8px; */
+  /* border: 1px solid transparent; */
+  /* padding: 0.6em 1.2em; */
+  /* font-size: 1em; */
+  /* font-weight: 500; */
+  /* font-family: inherit; */
+  /* background-color: #1a1a1a; */
   cursor: pointer;
   transition: border-color 0.25s;
 }
@@ -59,7 +142,7 @@ button:focus-visible {
 @media (prefers-color-scheme: light) {
   :root {
     color: #213547;
-    background-color: #ffffff;
+    background-color: var(--color-page);
   }
   a:hover {
     color: #747bff;
