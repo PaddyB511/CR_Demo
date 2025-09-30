@@ -58,7 +58,7 @@ function App() {
   return (
     <>
       {/* Temporary: show Browse page for development */}
-      <BrowsePage />
+      <ProgressPage />
     </>
   );
 }

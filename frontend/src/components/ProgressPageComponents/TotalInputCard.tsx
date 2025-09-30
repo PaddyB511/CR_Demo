@@ -1,12 +1,12 @@
 import Card from "./Card";
-import clock from "../../assets/clock.svg";
+import clock from "../../assets/clock2.svg";
 import plant1 from "../../assets/pinkplant1.svg";
 import plant2 from "../../assets/pinkplant2.svg";
 import plant3 from "../../assets/pinkplant3.svg";
 
 const TotalInputCard = () => {
   return (
-    <Card className="relative overflow-hidden pb-0 max-h-[200px] p-5">
+    <Card className="relative overflow-hidden pb-0 h-[200px] p-6">
       {/* Self-contained layout */}
       <div className="grid items-start grid-cols-2 grid-rows-1">
         {/* Left column */}
@@ -33,7 +33,7 @@ const TotalInputCard = () => {
         </div>
 
         {/* Right column (bottom-right anchored) */}
-        <div className="relative mb-1 max-w-[219px] max-h-[214px] justify-self-end">
+        <div className="relative max-w-[219px] max-h-[214px] justify-self-end">
           <img
             src={clock}
             alt="Clock"
