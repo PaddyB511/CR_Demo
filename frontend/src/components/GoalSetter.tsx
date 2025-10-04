@@ -260,9 +260,7 @@ const GoalSetter = () => {
                   : "bg-rose-50 text-rose-600"
               }`}
             >
-              {onTrack
-                ? "On track to reach by "
-                : "You will reach the goal on "}
+              "You will reach the goal on "
               {formatDate(reachDate)}
             </div>
           ) : (

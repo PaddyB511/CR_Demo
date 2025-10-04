@@ -3,6 +3,8 @@ import "./App.css";
 import axios from "axios";
 import { useAuth0 } from "@auth0/auth0-react";
 import BrowsePage from "./views/BrowsePage";
+import WatchPage from "./views/WatchPage.tsx";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import ProgressPage from "./views/ProgressPage";
 // import ProgressPage from "./views/ProgressPage"; // Unused import
 // import LevelBadgeInline, { LevelBadge } from "./components/ProgressPageComponents/LevelBadge"; // Unused import
@@ -41,25 +43,21 @@ function App() {
             Authorization: `Bearer ${accessToken}`,
           },
         })
-        .then((response) => {
-          // DRF may return either a list (simple view) or a paginated object { results: [...] }
-          const data = Array.isArray(response.data)
-            ? response.data
-            : response.data && Array.isArray(response.data.results)
-            ? response.data.results
-            : [];
-          setUsers(data);
-        })
+        .then(() => {})
         .catch((error) => console.error("Error fetching users:", error));
     };
     getUsers();
   }, [isAuthenticated]);
 
   return (
-    <>
-      {/* Temporary: show Browse page for development */}
-      <ProgressPage />
-    </>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Navigate to="/browse" replace />} />
+        <Route path="/browse" element={<BrowsePage />} />
+        <Route path="/watch/:id" element={<WatchPage />} />
+        <Route path="/progress" element={<ProgressPage />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
 

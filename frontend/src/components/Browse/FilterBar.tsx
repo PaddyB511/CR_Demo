@@ -94,9 +94,9 @@ export default function FilterBar({
         </button>
         <div className="hidden md:flex items-center gap-2 ml-auto">
           <label className="inline-flex items-center gap-2 px-3 py-2 rounded-pill bg-surface-muted text-gray-700 text-sm">
-            <span role="img" aria-label="hide">
-              🙈
-            </span>
+            {/* <span role="img" aria-label="hide">
+              // 🙈
+            </span> */}
             <input
               type="checkbox"
               className="accent-red-600"
@@ -196,9 +196,9 @@ export default function FilterBar({
                     onChange({ ...state, query: e.target.value })
                   }
                 />
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                {/* <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
                   🔎
-                </span>
+                </span> */}
                 {state.query && (
                   <button
                     className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400"

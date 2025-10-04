@@ -1,5 +1,6 @@
 import VideoCard from "./VideoCard";
 import type { VideoItem } from "./VideoCard";
+import { Link } from "react-router-dom";
 
 export default function RecommendedRail({ items }: { items: VideoItem[] }) {
   return (
@@ -8,7 +9,9 @@ export default function RecommendedRail({ items }: { items: VideoItem[] }) {
       <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none]
                       sm:[overflow:initial]">
         {items.map((it) => (
-          <VideoCard key={it.id} item={it} />
+          <Link key={it.id} to={`/watch/${it.id}`} className="block">
+            <VideoCard item={it} />
+          </Link>
         ))}
       </div>
     </div>

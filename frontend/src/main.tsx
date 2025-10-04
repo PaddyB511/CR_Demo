@@ -3,8 +3,6 @@ import { createRoot } from "react-dom/client";
 import "./index.css";
 import App from "./App.tsx";
 import { Auth0Provider } from "@auth0/auth0-react";
-import LoginButton from "./components/ProgressPageComponents/Login.tsx";
-import LogoutButton from "./components/ProgressPageComponents/Logout.tsx";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>

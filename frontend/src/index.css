@@ -41,9 +41,29 @@
   background-color: var(--color-page) !important;
 }
 .bg-surface {
+  --color-level-b1: #7ac431; /* Beginner 1 */
+  --color-level-b0: #59becb; /* Beginner 0 */
+  --color-level-i1: #ffb200; /* Intermediate 1 */
+  --color-level-adv: #db0000; /* Advanced */
+  --color-level-native: #7d6acb; /* Native Content */
   background-color: var(--color-surface) !important;
 }
 .bg-surface-muted {
+  .bg-level-b1 {
+    background-color: var(--color-level-b1) !important;
+  }
+  .bg-level-b0 {
+    background-color: var(--color-level-b0) !important;
+  }
+  .bg-level-i1 {
+    background-color: var(--color-level-i1) !important;
+  }
+  .bg-level-adv {
+    background-color: var(--color-level-adv) !important;
+  }
+  .bg-level-native {
+    background-color: var(--color-level-native) !important;
+  }
   background-color: var(--color-surface-muted) !important;
 }
 .bg-chip-selected {

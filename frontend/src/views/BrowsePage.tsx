@@ -9,6 +9,8 @@ import type {
 import RecommendedRail from "../components/Browse/RecommendedRail.tsx";
 import VideoCard from "../components/Browse/VideoCard.tsx";
 import type { VideoItem } from "../components/Browse/VideoCard.tsx";
+import { videos as SHARED_VIDEOS } from "../data/videos.ts";
+import { Link } from "react-router-dom";
 
 const LEVELS: LevelOption[] = [
   { id: "b0", label: "Beginner 0" },
@@ -20,79 +22,21 @@ const LEVELS: LevelOption[] = [
 ];
 
 const SPEAKERS: SpeakerOption[] = [
-  { id: "elvira", label: "Эльвира" },
-  { id: "baba-yaga", label: "Баба Яга" },
-  { id: "vladimir", label: "Владимир" },
+  { id: "speaker 1", label: "speaker 1" },
+  { id: "speaker 2", label: "speaker 2" },
+  { id: "speaker 3", label: "speaker 3" },
 ];
 
-const SAMPLE_VIDEOS: VideoItem[] = [
-  {
-    id: "1",
-    title: "Meet Elvira: 15 Weird Facts to Break the Ice",
-    channel: "Comprehensible Russian",
-    levelLabel: "Intermediate 2",
-    levelId: "i2",
-    published: "2025-07-29",
-    premium: false,
-    thumbnail:
-      "https://images.unsplash.com/photo-1526318472351-c75fcf070305?q=80&w=1200&auto=format&fit=crop",
-  },
-  {
-    id: "2",
-    title: "Meet Elvira: 15 Weird Facts to Break the Ice",
-    channel: "Comprehensible Russian",
-    levelLabel: "Intermediate 2",
-    levelId: "i2",
-    published: "2025-07-29",
-    premium: true,
-    thumbnail:
-      "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?q=80&w=1200&auto=format&fit=crop",
-  },
-  {
-    id: "3",
-    title: "Meet Elvira: 15 Weird Facts to Break the Ice",
-    channel: "Comprehensible Russian",
-    levelLabel: "Intermediate 2",
-    levelId: "i2",
-    published: "2025-07-29",
-    premium: false,
-    thumbnail:
-      "https://images.unsplash.com/photo-1528372444006-1bfc81acab02?q=80&w=1200&auto=format&fit=crop",
-  },
-  {
-    id: "4",
-    title: "Meet Elvira: 15 Weird Facts to Break the Ice",
-    channel: "Comprehensible Russian",
-    levelLabel: "Intermediate 2",
-    levelId: "i2",
-    published: "2025-07-29",
-    premium: true,
-    thumbnail:
-      "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?q=80&w=1200&auto=format&fit=crop",
-  },
-  {
-    id: "5",
-    title: "Meet Elvira: 15 Weird Facts to Break the Ice",
-    channel: "Comprehensible Russian",
-    levelLabel: "Intermediate 2",
-    levelId: "i2",
-    published: "2025-07-29",
-    premium: false,
-    thumbnail:
-      "https://images.unsplash.com/photo-1436450412740-6b988f486c6b?q=80&w=1200&auto=format&fit=crop",
-  },
-  {
-    id: "6",
-    title: "Meet Elvira: 15 Weird Facts to Break the Ice",
-    channel: "Comprehensible Russian",
-    levelLabel: "Intermediate 2",
-    levelId: "i2",
-    published: "2025-07-29",
-    premium: false,
-    thumbnail:
-      "https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?q=80&w=1200&auto=format&fit=crop",
-  },
-];
+const SAMPLE_VIDEOS: VideoItem[] = SHARED_VIDEOS.map((v) => ({
+  id: v.id,
+  title: v.title,
+  channel: v.channel,
+  levelLabel: v.levelLabel,
+  levelId: v.levelId,
+  published: v.published,
+  premium: v.premium,
+  thumbnail: v.thumbnail,
+}));
 
 export default function BrowsePage() {
   const [filters, setFilters] = useState<FilterState>({
@@ -154,8 +98,10 @@ export default function BrowsePage() {
           </h2>
           <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {videos.map((v) => (
-              <VideoCard key={v.id} item={v} />)
-            )}
+              <Link key={v.id} to={`/watch/${v.id}`} className="block">
+                <VideoCard item={v} />
+              </Link>
+            ))}
           </div>
         </section>
       </div>
