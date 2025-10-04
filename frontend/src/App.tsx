@@ -1,18 +1,27 @@
-import { useEffect, useState } from 'react'
-import './App.css'
-import axios from "axios"
-import { useAuth0 } from '@auth0/auth0-react';
+import { useEffect } from "react";
+import "./App.css";
+import axios from "axios";
+import { useAuth0 } from "@auth0/auth0-react";
+import BrowsePage from "./views/BrowsePage";
+import WatchPage from "./views/WatchPage.tsx";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import ProgressPage from "./views/ProgressPage";
+// import ProgressPage from "./views/ProgressPage"; // Unused import
+// import LevelBadgeInline, { LevelBadge } from "./components/ProgressPageComponents/LevelBadge"; // Unused import
+// import LevelCard from "./components/ProgressPageComponents/LevelCard"; // Unused import
+// import Dashboard from "./components/ProgressPageComponents/Dashboard"; // Unused import
+// import DailyGoalProgress from "./components/ProgressPageComponents/DailyGoalProgress"; // Unused import
+// import TotalInputCard from "./components/ProgressPageComponents/TotalInputCard"; // Unused import
+// import MiniBar from "./components/ProgressPageComponents/MiniBar"; // Unused import
+// import SegBar from "./components/ProgressPageComponents/SegBar"; // Unused import
 
-// Define the expected user shape coming from the API
-type User = {
-  username: string
-  email: string
-}
+// type User = {
+//   username: string;
+//   email: string;
+// };
 
 function App() {
-  // Explicitly type users as User[]
-  const [users, setUsers] = useState<User[]>([])
-  const { isAuthenticated,getAccessTokenSilently } = useAuth0();
+  const { isAuthenticated, getAccessTokenSilently } = useAuth0();
 
   useEffect(() => {
     const getUsers = async () => {
@@ -20,7 +29,7 @@ function App() {
       if (!isAuthenticated) {
         return;
       }
-    const accessToken = await getAccessTokenSilently({
+      const accessToken = await getAccessTokenSilently({
         authorizationParams: {
           audience: `https://cr/api/`,
           // scope: "read:current_user",
@@ -28,36 +37,28 @@ function App() {
       });
 
       console.log("Access Token:", accessToken);
-    axios.get('/api/users/', {
-      headers: {
-        Authorization: `Bearer ${accessToken}`
-      }
-    })
-      .then((response) => {
-        // DRF may return either a list (simple view) or a paginated object { results: [...] }
-        const data = Array.isArray(response.data)
-          ? response.data
-          : (response.data && Array.isArray(response.data.results) ? response.data.results : [])
-        setUsers(data)
-      })
-      .catch((error) => console.error('Error fetching users:', error))
-    }
+      axios
+        .get("/api/users/", {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        })
+        .then(() => {})
+        .catch((error) => console.error("Error fetching users:", error));
+    };
     getUsers();
-  }, [isAuthenticated])
+  }, [isAuthenticated]);
 
   return (
-    <>
-      <div>
-        <h2>User List</h2>
-        <ul>
-          {users.map((user) => (
-            <li key={user.username}>{user.username}</li>
-          ))}
-        </ul>
-      </div>
-      <h2>Comprehensible Russian</h2>
-    </>
-  )
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Navigate to="/browse" replace />} />
+        <Route path="/browse" element={<BrowsePage />} />
+        <Route path="/watch/:id" element={<WatchPage />} />
+        <Route path="/progress" element={<ProgressPage />} />
+      </Routes>
+    </BrowserRouter>
+  );
 }
 
-export default App
+export default App;

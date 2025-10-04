@@ -12,9 +12,14 @@
   "dependencies": {
     "@auth0/auth0-react": "^2.5.0",
     "@tailwindcss/vite": "^4.1.13",
+    "autoprefixer": "^10.4.21",
     "axios": "^1.12.2",
+    "json-server": "^1.0.0-beta.3",
+    "postcss": "^8.5.6",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
+    "react-router-dom": "^6.26.2",
+    "svgr": "^1.10.0",
     "tailwindcss": "^4.1.13"
   },
   "devDependencies": {
@@ -29,6 +34,7 @@
     "globals": "^16.3.0",
     "typescript": "~5.8.3",
     "typescript-eslint": "^8.39.1",
-    "vite": "^7.1.6"
+    "vite": "^7.1.2",
+    "vite-plugin-svgr": "^4.5.0"
   }
 }
