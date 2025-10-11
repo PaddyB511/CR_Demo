@@ -3,7 +3,7 @@ from django.utils.timezone import now
 from rest_framework import viewsets, permissions, decorators, response
 
 from ..models import OffPlatformLog
-from ..serializers import JournalNoteSerializer
+from backend.journal.serializers import JournalNoteSerializer  # migrated serializer location
 
 
 class IsOwner(permissions.BasePermission):

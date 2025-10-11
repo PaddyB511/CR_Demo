@@ -19,14 +19,22 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path, include
 from rest_framework import routers
-from .users import views
+from .users import views as user_views
+from backend.videos.views import VideoViewSet, ChannelViewSet, TagViewSet, SpeakerViewSet
+from backend.journal.views import JournalViewSet
 
 router = routers.DefaultRouter()
-router.register(r'users', views.UserViewSet)
+router.register(r'users', user_views.UserViewSet)
+router.register(r'videos', VideoViewSet, basename='video')
+router.register(r'channels', ChannelViewSet, basename='channel')
+router.register(r'tags', TagViewSet, basename='tag')
+router.register(r'speakers', SpeakerViewSet, basename='speaker')
+router.register(r'journal', JournalViewSet, basename='journal')
+
 
 urlpatterns = [
     path('api/', include(router.urls)),
-    path('api/', include('backend.platform.urls')),
+    # Removed legacy platform routes; platform app retained but URLs disabled.
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     path('admin/', admin.site.urls),
 ]

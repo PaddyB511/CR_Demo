@@ -71,8 +71,8 @@ class Video(models.Model):
 
 class UserViewLog(models.Model):
     """On-platform watch time (from /api/watchtime/update)."""
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="view_logs")
-    video = models.ForeignKey("platform.Video", null=True, blank=True, on_delete=models.SET_NULL, related_name="view_logs")
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="view_logs_old")
+    video = models.ForeignKey("platform.Video", null=True, blank=True, on_delete=models.SET_NULL, related_name="view_logs_old")
     watch_date = models.DateTimeField(db_index=True)
     watch_time = models.IntegerField(default=0)        # seconds
     video_time_start = models.FloatField(default=0.0)
@@ -87,7 +87,7 @@ class OffPlatformLog(models.Model):
     Manual logs added in 'My journal' and used for totals.
     Now extended with journal-specific fields.
     """
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="off_platform_logs")
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="off_platform_logs_old")
 
     # base fields used by totals
     time_duration = models.IntegerField()              # seconds
@@ -138,7 +138,7 @@ class OffPlatformLog(models.Model):
 
 
 class UserWordFrequency(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="word_freqs")
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="word_freqs_old")
     word = models.CharField(max_length=128, db_index=True)
     count = models.IntegerField(default=0)
 

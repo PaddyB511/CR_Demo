@@ -1,11 +1,9 @@
-import { useEffect } from "react";
 import "./App.css";
-import axios from "axios";
-import { useAuth0 } from "@auth0/auth0-react";
 import BrowsePage from "./views/BrowsePage";
 import WatchPage from "./views/WatchPage.tsx";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import ProgressPage from "./views/ProgressPage";
+import JournalPage from "./views/JournalPage";
 // import ProgressPage from "./views/ProgressPage"; // Unused import
 // import LevelBadgeInline, { LevelBadge } from "./components/ProgressPageComponents/LevelBadge"; // Unused import
 // import LevelCard from "./components/ProgressPageComponents/LevelCard"; // Unused import
@@ -15,40 +13,9 @@ import ProgressPage from "./views/ProgressPage";
 // import MiniBar from "./components/ProgressPageComponents/MiniBar"; // Unused import
 // import SegBar from "./components/ProgressPageComponents/SegBar"; // Unused import
 
-// type User = {
-//   username: string;
-//   email: string;
-// };
+// Removed unused local User type
 
 function App() {
-  const { isAuthenticated, getAccessTokenSilently } = useAuth0();
-
-  useEffect(() => {
-    const getUsers = async () => {
-      console.log("isAuthenticated:", isAuthenticated);
-      if (!isAuthenticated) {
-        return;
-      }
-      const accessToken = await getAccessTokenSilently({
-        authorizationParams: {
-          audience: `https://cr/api/`,
-          // scope: "read:current_user",
-        },
-      });
-
-      console.log("Access Token:", accessToken);
-      axios
-        .get("/api/users/", {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        })
-        .then(() => {})
-        .catch((error) => console.error("Error fetching users:", error));
-    };
-    getUsers();
-  }, [isAuthenticated]);
-
   return (
     <BrowserRouter>
       <Routes>
@@ -56,6 +23,7 @@ function App() {
         <Route path="/browse" element={<BrowsePage />} />
         <Route path="/watch/:id" element={<WatchPage />} />
         <Route path="/progress" element={<ProgressPage />} />
+        <Route path="/journal" element={<JournalPage />} />
       </Routes>
     </BrowserRouter>
   );

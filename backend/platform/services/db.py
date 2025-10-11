@@ -142,6 +142,10 @@ class Video:
             end = start + PAGE_SIZE
             return list(qs[start:end])
         return list(qs)
+    
+    def mark_as_watched(self, conn, uid: int) -> None:
+        # Watch the last second of the video
+        User.insert_watch_data(conn, uid, self.id, 1, datetime.datetime.now(), self.duration - 1, self.duration)
 
 
 class User:

@@ -23,14 +23,5 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true
   },
-  "include": [
-    "src/main.tsx",
-    "src/App.tsx",
-    "src/index.css",
-    "src/types/**/*.d.ts",
-    "src/views/BrowsePage.tsx",
-    "src/views/WatchPage.tsx",
-    "src/components/Browse/**/*.tsx",
-    "src/data/**/*.ts"
-  ]
+  "include": ["src/**/*.{ts,tsx,d.ts,css}", "src/vite-env.d.ts"]
 }

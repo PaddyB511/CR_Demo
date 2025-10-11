@@ -95,7 +95,7 @@ export default function DailyGoalProgress({
         <button
           type="button"
           onClick={onEdit}
-          className="py-2 px-2 rounded-full"
+          className="py-2 px-2 rounded-full bg-white"
           aria-label="Edit daily goal"
         >
           <img

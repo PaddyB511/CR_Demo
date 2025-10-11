@@ -70,6 +70,27 @@ const GoalSetter = () => {
   const [dailyMinutes, setDailyMinutes] = useState<number>(60);
   const [timeframeMonths, setTimeframeMonths] = useState<number>(12);
 
+  // Helpers for interdependent calculations
+  const remainingHoursToTarget = (targetIdx: number) => {
+    const currentMin = segments[currentIdx].minHours;
+    const targetMin = segments[targetIdx].minHours;
+    return Math.max(0, targetMin - currentMin);
+  };
+
+  const calcMonthsNeeded = (remainingHours: number, minsPerDay: number) => {
+    if (minsPerDay <= 0) return timeframeMonths; // keep existing if invalid
+    const daysNeeded = (remainingHours * 60) / minsPerDay; // hours->minutes / minsPerDay
+    const months = daysNeeded / 30.4375; // average month length
+    return Math.max(1, Math.ceil(months)); // integer months UI
+  };
+
+  const calcDailyMinsNeeded = (remainingHours: number, months: number) => {
+    if (months <= 0) return dailyMinutes;
+    const daysAvailable = months * 30.4375;
+    const minsPerDay = (remainingHours * 60) / daysAvailable;
+    return Math.max(1, Math.ceil(minsPerDay));
+  };
+
   // Helpers to position chips centered over a segment
   const centerPercent = (idx: number) => {
     const left =
@@ -90,7 +111,7 @@ const GoalSetter = () => {
     : "text-white";
 
   // Compute remaining hours to the START of the final segment (minimum needed to enter it)
-  const { hoursRemaining, daysToTarget, reachDate, onTrack } = useMemo(() => {
+  const { daysToTarget, reachDate, onTrack } = useMemo(() => {
     const currentMin = segments[currentIdx].minHours;
     const targetMin = segments[finalIdx].minHours;
     const remaining = Math.max(0, targetMin - currentMin);
@@ -102,7 +123,6 @@ const GoalSetter = () => {
     const tfDays = Math.round(timeframeMonths * 30.4375);
     const within = Number.isFinite(days) && days <= tfDays;
     return {
-      hoursRemaining: remaining,
       daysToTarget: days,
       reachDate: d,
       onTrack: within,
@@ -196,7 +216,12 @@ const GoalSetter = () => {
             <select
               className="bg-transparent outline-none appearance-none pr-3"
               value={finalIdx}
-              onChange={(e) => setFinalIdx(Number(e.target.value))}
+              onChange={(e) => {
+                const newIdx = Number(e.target.value);
+                setFinalIdx(newIdx);
+                const rem = remainingHoursToTarget(newIdx);
+                setTimeframeMonths(calcMonthsNeeded(rem, dailyMinutes));
+              }}
             >
               {segments.map((s, i) => (
                 <option key={s.label} value={i} disabled={i <= currentIdx}>
@@ -219,9 +244,12 @@ const GoalSetter = () => {
               min={0}
               className="w-16 bg-transparent outline-none text-center appearance-none"
               value={Number.isFinite(dailyMinutes) ? dailyMinutes : 0}
-              onChange={(e) =>
-                setDailyMinutes(Math.max(0, Number(e.target.value)))
-              }
+              onChange={(e) => {
+                const newDaily = Math.max(0, Number(e.target.value));
+                setDailyMinutes(newDaily);
+                const rem = remainingHoursToTarget(finalIdx);
+                setTimeframeMonths(calcMonthsNeeded(rem, newDaily));
+              }}
             />
             <span className="text-[#9C9C9C] font-inter font-medium text-[13px]">
               min
@@ -240,9 +268,12 @@ const GoalSetter = () => {
               min={1}
               className="w-16 bg-transparent outline-none text-center appearance-none"
               value={Number.isFinite(timeframeMonths) ? timeframeMonths : 1}
-              onChange={(e) =>
-                setTimeframeMonths(Math.max(1, Number(e.target.value)))
-              }
+              onChange={(e) => {
+                const newMonths = Math.max(1, Number(e.target.value));
+                setTimeframeMonths(newMonths);
+                const rem = remainingHoursToTarget(finalIdx);
+                setDailyMinutes(calcDailyMinsNeeded(rem, newMonths));
+              }}
             />
             <span className="text-[#9C9C9C] font-inter font-medium text-[13px]">
               months
@@ -254,16 +285,9 @@ const GoalSetter = () => {
         <div className="ml-auto">
           {Number.isFinite(daysToTarget) ? (
             <div
-              className={`inline-flex items-center px-4 py-2 rounded-full ${
-                onTrack
-                  ? "bg-emerald-50 text-emerald-700"
-                  : "bg-rose-50 text-rose-600"
-              }`}
+              className={`inline-flex items-center px-4 py-2 rounded-full bg-rose-50 text-rose-600`}
             >
-              {onTrack
-                ? "On track to reach by "
-                : "You will reach the goal on "}
-              {formatDate(reachDate)}
+              You will reach the goal on {formatDate(reachDate)}
             </div>
           ) : (
             <div className="inline-flex items-center px-4 py-2 rounded-full bg-rose-50 text-rose-600">
