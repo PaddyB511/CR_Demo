@@ -4,6 +4,9 @@ import WatchPage from "./views/WatchPage.tsx";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import ProgressPage from "./views/ProgressPage";
 import JournalPage from "./views/JournalPage";
+import Premium from "./views/Premium/premium.tsx";
+import Contact from "./views/Contact/contact.tsx";
+
 // import ProgressPage from "./views/ProgressPage"; // Unused import
 // import LevelBadgeInline, { LevelBadge } from "./components/ProgressPageComponents/LevelBadge"; // Unused import
 // import LevelCard from "./components/ProgressPageComponents/LevelCard"; // Unused import
@@ -24,6 +27,8 @@ function App() {
         <Route path="/watch/:id" element={<WatchPage />} />
         <Route path="/progress" element={<ProgressPage />} />
         <Route path="/journal" element={<JournalPage />} />
+        <Route path="/premium" element={<Premium />} />
+        <Route path="/contact" element={<Contact />} />
       </Routes>
     </BrowserRouter>
   );
