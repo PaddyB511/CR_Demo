@@ -1,14 +1,32 @@
+// src/views/premium/premium.tsx
 import React, { useEffect } from "react";
 import TopBar from "./topbar";
 import SideNav from "./sidenav";
 import PriceCard from "./pricecard";
 import MembershipComparison from "./membershipcomparison";
-import { getUser, startCheckout } from "../../api/payments";
+
+// Optional: hydrate header counters, but don't crash if api is absent
+let getUser: (() => Promise<any>) | null = null;
+try {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  getUser = require("../../api/payments").getUser as typeof getUser;
+} catch {
+  // noop
+}
+
+// Plan IDs (replace YEARLY with your real PayPal plan id)
+const PLAN_MONTHLY = "P-2VC39471BE0365153NDSQ6RI"; // $8/mo
+const PLAN_YEARLY = "P-YOUR_YEARLY_PLAN_ID";       // $80/yr
 
 export default function Premium() {
   useEffect(() => {
-    // populate header counters (safe if backend returns stubs)
-    getUser().catch(() => {});
+    (async () => {
+      try {
+        if (getUser) await getUser();
+      } catch (e) {
+        console.warn("[premium] getUser failed", e);
+      }
+    })();
   }, []);
 
   return (
@@ -20,32 +38,37 @@ export default function Premium() {
 
         <div className="flex-1 space-y-10">
           {/* Pricing cards */}
-          <section className="flex gap-6 flex-nowrap overflow-x-auto xl:overflow-visible">
+          <section className="flex gap-6 flex-wrap xl:flex-nowrap justify-start overflow-x-auto xl:overflow-visible">
             <PriceCard
               price="US$ 8"
               subtitle="per month"
-              cta="Select this plan"
-              onSelect={() => startCheckout("monthly")}
+              cta="Select a membership"
+              mode="subscription"
+              planId={PLAN_MONTHLY}
+              size="sm"
             />
 
             <PriceCard
               price="US$ 80"
               subtitle="per year"
-              cta="Select this plan"
-              badgeText="-17%"
-              onSelect={() => startCheckout("yearly")}
+              cta="Select a membership"
+              badgeText="-20%"
+              mode="subscription"
+              planId={PLAN_YEARLY}
+              size="md"
             />
 
             <PriceCard
               price="US$ 300"
               subtitle="for lifetime access"
-              cta="Select this plan"
+              cta="Select a membership"
               badgeText="Beneficial"
-              onSelect={() => startCheckout("lifetime")}
+              mode="onetime"
+              onetimeAmountUsd={300}
+              size="midLg"
             />
           </section>
 
-          {/* Membership comparison section */}
           <MembershipComparison />
         </div>
       </main>

@@ -1,48 +1,57 @@
-// src/views/Contact/Contact.tsx
 import { useEffect } from "react";
 import TopBar from "../Premium/topbar";
 import SideNav from "../Premium/sidenav";
 import ContactForm from "./form";
 import { getUser } from "../../api/payments";
 
+// import background image (Vite will resolve it)
 import bgUrl from "../../assets/contact/background.svg?url";
 
-<div className="relative mx-auto max-w-[1200px] px-4 py-8 flex gap-8 min-h-[480px]">
-  <div
-    aria-hidden
-    className="absolute inset-0 -z-10 bg-no-repeat bg-cover"
-    style={{ backgroundImage: `url(${bgUrl})` }}
-  />
-  {/* ... SideNav + card ... */}
-</div>
-
-
 export default function Contact() {
-  useEffect(() => { getUser().catch(() => {}); }, []);
+  // make sure user info loads safely
+  useEffect(() => {
+    getUser().catch(() => {});
+  }, []);
 
   return (
-    <div className="min-h-screen bg-[#FDF0F0] text-[#111]">
+    <div className="min-h-screen flex flex-col bg-[#FDF0F0] text-[#111]">
+      {/* --- Top bar --- */}
       <TopBar />
 
-      {/* Make THIS wrapper relative so the background can be absolutely positioned */}
-      <div className="relative mx-auto max-w-[1200px] px-4 py-8 flex gap-8">
-        {/* Background layer */}
+      {/* --- Full-bleed wrapper for background --- */}
+      <div className="relative flex-1 min-h-screen">
+        {/* Background image fills entire screen */}
         <div
           aria-hidden
-          className="absolute inset-0 -z-10 bg-no-repeat bg-cover"
-          style={{ backgroundImage: `url(${bgUrl})` }}
+          className="
+            absolute inset-0 z-0 pointer-events-none
+            bg-no-repeat bg-cover
+            bg-[length:100%_auto] sm:bg-[length:100%_auto]
+          "
+          style={{
+            backgroundImage: `url(${bgUrl})`,
+            backgroundPosition: "center top",
+          }}
         />
 
-        {/* Left nav */}
-        <SideNav />
+        {/* --- Centered content container --- */}
+        <div className="relative z-10 mx-auto w-full max-w-[1200px] px-4 py-8 flex gap-8">
+          {/* Sidebar */}
+          <SideNav />
 
-        {/* Main card */}
-        <main className="flex-1">
-          <section className="rounded-card bg-white/80 backdrop-blur border border-border shadow-card p-4 md:p-6">
-            <h1 className="text-[20px] md:text-[22px] font-semibold mb-4">Contact us</h1>
-            <ContactForm />
-          </section>
-        </main>
+          {/* Main content */}
+          <main className="flex-1">
+            <section className="rounded-card bg-white/80 backdrop-blur border border-border shadow-card p-4 md:p-6">
+              <h1 className="text-[22px] font-semibold mb-4">Contact us</h1>
+
+              <p className="text-sm text-gray-600 mb-6 max-w-prose">
+                
+              </p>
+
+              <ContactForm />
+            </section>
+          </main>
+        </div>
       </div>
     </div>
   );

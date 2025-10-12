@@ -23,3 +23,12 @@ declare module "*.svg?url" {
   const src: string;
   export default src;
 }
+
+interface ImportMetaEnv {
+  readonly VITE_PAYPAL_CLIENT_ID: string;
+  // Add other custom env vars here if needed
+}
+
+interface ImportMeta {
+  readonly env: ImportMetaEnv;
+}

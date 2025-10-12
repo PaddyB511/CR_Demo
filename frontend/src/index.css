@@ -175,6 +175,18 @@ button:focus-visible {
   --color-gray-350: #c2c2c2; /* new */
   --color-gray-300: #d9d9d9; /* already used in places */
   --color-gray-100: #f6f6f6; /* page bg (already set as --color-page) */
+
+/* Decorative background for Contact page */
+.contact-bg {
+  background-image: url("@/assets/contact/background.svg");
+  /* or: background-image: url("./assets/contact/background.svg"); */
+  background-repeat: no-repeat;
+  background-size: 160% auto;       /* zoom */
+  background-position: center -100px; /* move up/down */
+  pointer-events: none;
 }
 
-}
+   }
+  }
+
+
