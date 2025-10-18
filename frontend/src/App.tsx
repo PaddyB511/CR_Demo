@@ -1,37 +1,50 @@
 import "./App.css";
+import { BrowserRouter, Routes, Route, Navigate, Outlet } from "react-router-dom";
+import { useState } from "react";
+
 import BrowsePage from "./views/BrowsePage";
 import WatchPage from "./views/WatchPage.tsx";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import ProgressPage from "./views/ProgressPage";
 import JournalPage from "./views/JournalPage";
 import Premium from "./views/Premium/premium.tsx";
 import Contact from "./views/Contact/contact.tsx";
+import Account from "./views/Account/Account";
 
-// import ProgressPage from "./views/ProgressPage"; // Unused import
-// import LevelBadgeInline, { LevelBadge } from "./components/ProgressPageComponents/LevelBadge"; // Unused import
-// import LevelCard from "./components/ProgressPageComponents/LevelCard"; // Unused import
-// import Dashboard from "./components/ProgressPageComponents/Dashboard"; // Unused import
-// import DailyGoalProgress from "./components/ProgressPageComponents/DailyGoalProgress"; // Unused import
-// import TotalInputCard from "./components/ProgressPageComponents/TotalInputCard"; // Unused import
-// import MiniBar from "./components/ProgressPageComponents/MiniBar"; // Unused import
-// import SegBar from "./components/ProgressPageComponents/SegBar"; // Unused import
+import TopBar from "./views/Premium/topbar";
+import SignUpWizard from "./views/Auth/SignUpWizard";
 
-// Removed unused local User type
+function AppLayout() {
+  const [openSignUp, setOpenSignUp] = useState(false);
 
-function App() {
+  return (
+    <>
+      <TopBar
+        onSignUpClick={() => setOpenSignUp(true)}
+        // onLoginClick={() => setOpenLogin(true)} // add later if you also build a login modal
+      />
+      <main>
+        <Outlet />
+      </main>
+      <SignUpWizard open={openSignUp} onClose={() => setOpenSignUp(false)} />
+    </>
+  );
+}
+
+export default function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Navigate to="/browse" replace />} />
-        <Route path="/browse" element={<BrowsePage />} />
-        <Route path="/watch/:id" element={<WatchPage />} />
-        <Route path="/progress" element={<ProgressPage />} />
-        <Route path="/journal" element={<JournalPage />} />
-        <Route path="/premium" element={<Premium />} />
-        <Route path="/contact" element={<Contact />} />
+        <Route element={<AppLayout />}>
+          <Route path="/" element={<Navigate to="/browse" replace />} />
+          <Route path="/browse" element={<BrowsePage />} />
+          <Route path="/watch/:id" element={<WatchPage />} />
+          <Route path="/progress" element={<ProgressPage />} />
+          <Route path="/journal" element={<JournalPage />} />
+          <Route path="/premium" element={<Premium />} />
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/account" element={<Account />} />
+        </Route>
       </Routes>
     </BrowserRouter>
   );
 }
-
-export default App;

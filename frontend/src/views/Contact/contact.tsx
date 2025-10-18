@@ -16,7 +16,7 @@ export default function Contact() {
   return (
     <div className="min-h-screen flex flex-col bg-[#FDF0F0] text-[#111]">
       {/* --- Top bar --- */}
-      <TopBar />
+  
 
       {/* --- Full-bleed wrapper for background --- */}
       <div className="relative flex-1 min-h-screen">

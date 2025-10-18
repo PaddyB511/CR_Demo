@@ -31,7 +31,7 @@ export default function Premium() {
 
   return (
     <div className="min-h-screen bg-page text-[15px] text-[#111]">
-      <TopBar />
+     
 
       <main className="mx-auto max-w-[1280px] px-4 py-8 flex gap-8">
         <SideNav />
@@ -42,7 +42,7 @@ export default function Premium() {
             <PriceCard
               price="US$ 8"
               subtitle="per month"
-              cta="Select a membership"
+              cta="Select this plan"
               mode="subscription"
               planId={PLAN_MONTHLY}
               size="sm"
@@ -51,8 +51,8 @@ export default function Premium() {
             <PriceCard
               price="US$ 80"
               subtitle="per year"
-              cta="Select a membership"
-              badgeText="-20%"
+              cta="Select this plan"
+              badgeText="-17%"
               mode="subscription"
               planId={PLAN_YEARLY}
               size="md"
@@ -61,7 +61,7 @@ export default function Premium() {
             <PriceCard
               price="US$ 300"
               subtitle="for lifetime access"
-              cta="Select a membership"
+              cta="Select this plan"
               badgeText="Beneficial"
               mode="onetime"
               onetimeAmountUsd={300}
