@@ -1,5 +1,5 @@
 import "./App.css";
-import { BrowserRouter, Routes, Route, Navigate, Outlet } from "react-router-dom";
+import { HashRouter, Routes, Route, Navigate, Outlet } from "react-router-dom";
 import { useState } from "react";
 
 import BrowsePage from "./views/BrowsePage";
@@ -18,10 +18,7 @@ function AppLayout() {
 
   return (
     <>
-      <TopBar
-        onSignUpClick={() => setOpenSignUp(true)}
-        // onLoginClick={() => setOpenLogin(true)} // add later if you also build a login modal
-      />
+      <TopBar onSignUpClick={() => setOpenSignUp(true)} />
       <main>
         <Outlet />
       </main>
@@ -32,7 +29,7 @@ function AppLayout() {
 
 export default function App() {
   return (
-    <BrowserRouter>
+    <HashRouter>
       <Routes>
         <Route element={<AppLayout />}>
           <Route path="/" element={<Navigate to="/browse" replace />} />
@@ -45,6 +42,6 @@ export default function App() {
           <Route path="/account" element={<Account />} />
         </Route>
       </Routes>
-    </BrowserRouter>
+    </HashRouter>
   );
 }

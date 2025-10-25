@@ -6,8 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "deploy": "npm run build && git add -A && git commit -m 'Build for GH Pages' && git push origin main"
   },
   "dependencies": {
     "@auth0/auth0-react": "^2.5.0",

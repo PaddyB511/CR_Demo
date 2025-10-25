@@ -16,7 +16,12 @@ export default defineConfig({
       '@': path.resolve(__dirname, 'src'),
     },
   },
-  base: '/',
+  // 👇 base path must match your repo name for GitHub Pages
+  base: '/CR_Demo/',
+  build: {
+    outDir: 'docs',       // GitHub Pages expects /docs on main branch
+    emptyOutDir: true,
+  },
   server: {
     proxy: {
       '/api': {
