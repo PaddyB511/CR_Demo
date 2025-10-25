@@ -9,6 +9,14 @@ import { fileURLToPath } from 'node:url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// --- IMPORTANT ---
+// If this config is at the REPO ROOT (same folder as package.json),
+// keep OUT_DIR as below. If it's inside `frontend/`, change to '../docs'.
+const OUT_DIR = path.resolve(__dirname, 'docs');
+
+// GitHub Pages base must match your repo name
+const REPO_BASE = '/CR_Demo/';
+
 export default defineConfig({
   plugins: [react(), tailwindcss(), svgr()],
   resolve: {
@@ -16,10 +24,9 @@ export default defineConfig({
       '@': path.resolve(__dirname, 'src'),
     },
   },
-  // 👇 base path must match your repo name for GitHub Pages
-  base: '/CR_Demo/',
+  base: REPO_BASE,
   build: {
-    outDir: 'docs',       // GitHub Pages expects /docs on main branch
+    outDir: OUT_DIR,   // ensures /docs at the repo root (or ../docs if inside frontend/)
     emptyOutDir: true,
   },
   server: {
