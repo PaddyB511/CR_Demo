@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import InfoCard from "../components/Browse/InfoCard.tsx";
 import FilterBar from "../components/Browse/FilterBar.tsx";
 import type {
@@ -9,11 +9,17 @@ import type {
 import RecommendedRail from "../components/Browse/RecommendedRail.tsx";
 import VideoCard from "../components/Browse/VideoCard.tsx";
 import type { VideoItem } from "../components/Browse/VideoCard.tsx";
-// import { videos as SHARED_VIDEOS } from "../data/videos.ts"; // legacy static
-import { fetchVideos, fetchSpeakers } from "../api/videos";
-import type { ApiVideo, ApiSpeaker } from "../api/videos";
-import { useAuth0 } from "@auth0/auth0-react";
 import { Link } from "react-router-dom";
+
+/* ---------------- constants ---------------- */
+
+const API_BASE = "/api/platform";
+// Use legacy platform endpoints (public browse) so the frontend receives the
+// legacy JSON shape ({ videos: [...], hasMore: ... }). The DRF viewset under
+// /api/videos/ returns a different paginated shape which this page does not
+// currently expect.
+const LIST_URL = `${API_BASE}/videos/`;
+const STATS_URL = `${API_BASE}/videos/statistics/`;
 
 const LEVELS: LevelOption[] = [
   { id: "Beginner 0", label: "Beginner 0" },
@@ -25,25 +31,83 @@ const LEVELS: LevelOption[] = [
   { id: "Native", label: "Native" },
 ];
 
-// Speakers now loaded dynamically from API
-// Placeholder kept commented for reference.
-// const SPEAKERS: SpeakerOption[] = [];
+/* ------------- API shapes (tolerant) ------------- */
+type ApiVideo = {
+  id: number | string;
+  on_platform_id: string;
+  title: string;
+  description?: string;
+  upload_date?: string;
+  duration?: number;
+  level?: string;
+  premium?: boolean;
+  channelName?: string;
+  channel_name?: string;
+  thumbnailUrl?: string;
+  thumbnail_url?: string;
+};
 
-// map API video to UI VideoItem shape
-function mapVideo(v: ApiVideo): VideoItem {
-  // derive a pseudo levelId mapping from canonical level
-  const levelId = v.level; // now use the exact level string as id
+type StatsResponse = {
+  total: number;
+  statistics: {
+    speakers: { name: string; count: number }[];
+  };
+};
+
+/* ------------- helpers ------------- */
+function mapVideo(v: any): VideoItem {
+  // accept both snake_case and camelCase from the API
+  const id = String(v.id ?? v.pk ?? v.video_id);
+
+  const level = v.level ?? v.levelLabel ?? "";
+  const channel =
+    v.channel_name ?? v.channelName ?? v.channel ?? "";
+  const date =
+    v.upload_date ?? v.published ?? v.publish_date ?? "";
+
+  // thumbnail candidates
+  const thumb =
+    v.thumbnail_url ??
+    v.thumbnailUrl ??
+    (v.on_platform_id
+      ? `https://img.youtube.com/vi/${v.on_platform_id}/hqdefault.jpg`
+      : v.youtube_id
+      ? `https://img.youtube.com/vi/${v.youtube_id}/hqdefault.jpg`
+      : v.external_id
+      ? `https://img.youtube.com/vi/${v.external_id}/hqdefault.jpg`
+      : undefined);
+
   return {
-    id: String(v.id),
-    title: v.title,
-    channel: v.channelName || "",
-  levelLabel: v.level,
-  levelId,
-    published: v.upload_date || "",
-    premium: v.premium,
-    thumbnail: v.thumbnailUrl || `https://img.youtube.com/vi/${v.on_platform_id}/hqdefault.jpg`,
+    id,
+    title: v.title ?? "",
+    channel,
+    levelLabel: level,
+    levelId: level,
+    published: date,
+    premium: Boolean(v.premium),
+    thumbnail: thumb || "/placeholder-thumb.png", // add a tiny local placeholder if you want
   };
 }
+
+
+function toQueryString(filters: FilterState, page: number): string {
+  const qs = new URLSearchParams();
+  qs.set("page", String(page)); // backend expects 1-based
+
+  if (filters.query?.trim()) qs.set("text", filters.query.trim());
+  (filters.selectedLevels || []).forEach((lvl) => qs.append("level", lvl));
+  (filters.selectedSpeakers || []).forEach((sp) => qs.append("speaker", sp));
+  if (filters.hideWatched) qs.set("hide_watched", "1");
+  if (filters.sort) qs.set("sort", filters.sort);
+
+  // Uncomment if you add duration sliders to FilterBar later
+  // if (filters.minSeconds != null) qs.set("min_duration", String(filters.minSeconds));
+  // if (filters.maxSeconds != null) qs.set("max_duration", String(filters.maxSeconds));
+
+  return qs.toString();
+}
+
+/* ---------------- component ---------------- */
 
 export default function BrowsePage() {
   const [filters, setFilters] = useState<FilterState>({
@@ -54,76 +118,81 @@ export default function BrowsePage() {
     query: "",
   });
 
-  const onClearAllTags = () =>
-    setFilters((f: FilterState) => ({
-      ...f,
-      selectedLevels: [],
-      selectedSpeakers: [],
-    }));
+  const [page, setPage] = useState(1);
 
-  const { getAccessTokenSilently, isAuthenticated } = useAuth0();
+  const [videos, setVideos] = useState<VideoItem[]>([]);
+  const [hasMore, setHasMore] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [page, setPage] = useState(1);
-  const [apiVideos, setApiVideos] = useState<VideoItem[]>([]);
-  const [hasMore, setHasMore] = useState(false);
+
   const [speakerOptions, setSpeakerOptions] = useState<SpeakerOption[]>([]);
   const [loadingSpeakers, setLoadingSpeakers] = useState(false);
   const [speakerError, setSpeakerError] = useState<string | null>(null);
 
-  // load speakers once after auth
+  const listQS = useMemo(() => toQueryString(filters, page), [filters, page]);
+
+  // Load speakers (public)
   useEffect(() => {
     let cancelled = false;
     async function loadSpeakers() {
-      if (!isAuthenticated) return;
-      setLoadingSpeakers(true); setSpeakerError(null);
+      setLoadingSpeakers(true);
+      setSpeakerError(null);
       try {
-        const token = await getAccessTokenSilently({ authorizationParams: { audience: "https://cr/api/" }});
-        const data: ApiSpeaker[] = await fetchSpeakers(token);
+        const r = await fetch(STATS_URL);
+        if (!r.ok) throw new Error(`Failed (${r.status})`);
+        const data: StatsResponse = await r.json();
         if (cancelled) return;
-        setSpeakerOptions(data.map(s => ({ id: s.name, label: s.name })));
+        const options: SpeakerOption[] = (data.statistics?.speakers ?? []).map((s) => ({
+          id: s.name,
+          label: s.name,
+        }));
+        setSpeakerOptions(options);
       } catch (e: any) {
-        if (!cancelled) setSpeakerError(e?.message || 'Failed to load speakers');
+        if (!cancelled) setSpeakerError(e?.message || "Failed to load speakers");
       } finally {
         if (!cancelled) setLoadingSpeakers(false);
       }
     }
     loadSpeakers();
-    return () => { cancelled = true; };
-  }, [isAuthenticated, getAccessTokenSilently]);
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
-  // load videos whenever filters/page change
+  // Load videos
   useEffect(() => {
     let cancelled = false;
-    async function load() {
-      if (!isAuthenticated) return; // wait for auth
-      setLoading(true); setError(null);
+    async function loadVideos() {
+      setLoading(true);
+      setError(null);
       try {
-        const token = await getAccessTokenSilently({
-          authorizationParams: { audience: "https://cr/api/" },
-        });
-        const data = await fetchVideos({
-          query: filters.query,
-          levels: filters.selectedLevels,
-          speakers: filters.selectedSpeakers,
-          hideWatched: filters.hideWatched,
-          page,
-        }, token);
-        if (cancelled) return;
-        const mapped = data.results.map(mapVideo);
-        setApiVideos(mapped);
-        setHasMore(Boolean(data.next));
+        const r = await fetch(`${LIST_URL}?${listQS}`);
+        if (!r.ok) throw new Error(`Failed (${r.status})`);
+  const data = await r.json();
+  if (cancelled) return;
+  // Accept both legacy platform format { videos: [...] , hasMore } and DRF paginated { results: [...], next }
+  const rawItems = (data.videos ?? data.results) || [];
+  const items: VideoItem[] = rawItems.map(mapVideo);
+  setVideos(items);
+  setHasMore(Boolean(data.hasMore ?? data.next));
       } catch (e: any) {
         if (!cancelled) setError(e?.message || "Failed to load videos");
       } finally {
         if (!cancelled) setLoading(false);
       }
     }
-    load();
-    return () => { cancelled = true; };
-  }, [filters, page, isAuthenticated, getAccessTokenSilently]);
+    loadVideos();
+    return () => {
+      cancelled = true;
+    };
+  }, [listQS]);
 
-  const videos = apiVideos; // naming consistency
+  const onClearAllTags = () =>
+    setFilters((f) => ({
+      ...f,
+      selectedLevels: [],
+      selectedSpeakers: [],
+    }));
 
   return (
     <div className="min-h-screen bg-page">
@@ -135,11 +204,18 @@ export default function BrowsePage() {
             levels={LEVELS}
             speakers={speakerOptions}
             state={filters}
-            onChange={setFilters}
+            onChange={(next) => {
+              setPage(1); // reset paging when filters change
+              setFilters(next);
+            }}
             onClearAllTags={onClearAllTags}
           />
-          {loadingSpeakers && <div className="mt-2 text-xs text-gray-400">Loading speakers…</div>}
-          {speakerError && <div className="mt-2 text-xs text-red-500">{speakerError}</div>}
+          {loadingSpeakers && (
+            <div className="mt-2 text-xs text-gray-400">Loading speakers…</div>
+          )}
+          {speakerError && (
+            <div className="mt-2 text-xs text-red-500">{speakerError}</div>
+          )}
         </div>
 
         <section className="mt-8">
@@ -155,26 +231,33 @@ export default function BrowsePage() {
           <h2 className="text-xl md:text-2xl font-semibold text-gray-900">
             All
           </h2>
-          <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {loading && <div className="text-sm text-gray-500">Loading…</div>}
             {error && <div className="text-sm text-red-600">{error}</div>}
-            {!loading && !error && videos.map((v) => (
-              <Link key={v.id} to={`/watch/${v.id}`} className="block">
-                <VideoCard item={v} />
-              </Link>
-            ))}
+            {!loading &&
+              !error &&
+              videos.map((v) => (
+                <Link key={v.id} to={`/watch/${v.id}`} className="block">
+                  <VideoCard item={v} />
+                </Link>
+              ))}
           </div>
+
           <div className="mt-4 flex gap-2">
             <button
               disabled={page === 1 || loading}
               onClick={() => setPage((p) => Math.max(1, p - 1))}
-              className="px-3 py-1 rounded-pill bg-surface-muted disabled:opacity-50"
-            >Prev</button>
+              className="rounded-full bg-surface-muted px-3 py-1 disabled:opacity-50"
+            >
+              Prev
+            </button>
             <button
               disabled={!hasMore || loading}
               onClick={() => setPage((p) => p + 1)}
-              className="px-3 py-1 rounded-pill bg-surface-muted disabled:opacity-50"
-            >Next</button>
+              className="rounded-full bg-surface-muted px-3 py-1 disabled:opacity-50"
+            >
+              Next
+            </button>
           </div>
         </section>
       </div>

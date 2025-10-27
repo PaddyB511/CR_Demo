@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from .models import OffPlatformLog
-
+from backend.platform.models import Video
 
 # ===== existing serializers you already had =====
 class EmailCodeSerializer(serializers.Serializer):
@@ -14,6 +14,10 @@ class UserUpdateSerializer(serializers.Serializer):
     finalGoalMinutes = serializers.IntegerField(required=False, min_value=0)
     finalGoalDate = serializers.DateField(required=False)
 
+class VideoListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Video
+        fields = ("id","on_platform_id","title","description","duration","upload_date","level","premium")
 
 class OffPlatformTimeSerializer(serializers.Serializer):
     startDate = serializers.DateField()

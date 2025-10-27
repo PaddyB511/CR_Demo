@@ -1,5 +1,10 @@
 import { useEffect, useState } from "react";
 
+// ✅ Import SVGs as URLs so Vite rewrites paths for dev & build
+import profileIconUrl from "@/assets/ProfileIcon.svg?url";
+import plusIconUrl from "@/assets/PlusIcon.svg?url";
+import addLanguageUrl from "@/assets/AddLanguage.svg?url";
+
 type LanguageRow = { language: string; level: string };
 
 type Props = {
@@ -31,8 +36,12 @@ export default function AccountSettingsModal({
   const [birthday, setBirthday] = useState(initialBirthday);
   const [password, setPassword] = useState(""); // masked/demo only
   const [nativeLanguage, setNativeLanguage] = useState(initialNativeLanguage);
-  const [otherLanguages, setOtherLanguages] = useState<LanguageRow[]>(initialOtherLanguages);
-  const [earForMusic, setEarForMusic] = useState<boolean | null>(initialEarForMusic);
+  const [otherLanguages, setOtherLanguages] = useState<LanguageRow[]>(
+    initialOtherLanguages
+  );
+  const [earForMusic, setEarForMusic] = useState<boolean | null>(
+    initialEarForMusic
+  );
 
   useEffect(() => {
     if (open) {
@@ -55,10 +64,6 @@ export default function AccountSettingsModal({
     setOtherLanguages((rows) => rows.filter((_, i) => i !== idx));
 
   const save = async () => {
-    // ⬇️ Placeholder: show a toast and close.
-    // For real persistence:
-    // 1) Decide where these fields live (see “Backend notes” below).
-    // 2) POST to your own endpoint (e.g. /api/user/profile) with this payload.
     const payload = {
       name,
       email,
@@ -79,7 +84,9 @@ export default function AccountSettingsModal({
         {/* Header */}
         <div className="rounded-t-[22px] bg-[#FDF0F0] px-5 py-4">
           <div className="flex items-center gap-2">
-            <h2 className="text-[18px] font-semibold text-black">Account Settings</h2>
+            <h2 className="text-[18px] font-semibold text-black">
+              Account Settings
+            </h2>
             <svg className="h-4 w-4 text-[#DB0000]" viewBox="0 0 24 24" fill="none">
               <path d="M5 12h14" stroke="currentColor" strokeWidth="2" />
             </svg>
@@ -92,7 +99,7 @@ export default function AccountSettingsModal({
           <div className="mb-6 flex items-start gap-4">
             <div className="relative">
               <img
-                src="/src/assets/ProfileIcon.svg"
+                src={profileIconUrl}            // ✅ use imported URL
                 alt="Profile"
                 className="h-[92px] w-[92px] rounded-full"
               />
@@ -101,7 +108,11 @@ export default function AccountSettingsModal({
                 title="Change photo"
                 type="button"
               >
-                <img src="/src/assets/PlusIcon.svg" alt="Add" className="h-9 w-9" />
+                <img
+                  src={plusIconUrl}             // ✅ use imported URL
+                  alt="Add"
+                  className="h-9 w-9"
+                />
               </button>
             </div>
 
@@ -110,15 +121,14 @@ export default function AccountSettingsModal({
                 Subscription: <span className="font-semibold">Basic</span>
               </div>
               <p className="mt-1 text-[12px] leading-snug text-[#6b7280]">
-                Upgrade for premium features: Premium videos, Download audios &amp; transcriptions,
-                Playlists, Offline use, Unlimited Time Tracking :)
+                Upgrade for premium features: Premium videos, Download audios &amp;
+                transcriptions, Playlists, Offline use, Unlimited Time Tracking :)
               </p>
               <button
                 onClick={onGoPremium}
                 className="mt-2 inline-flex items-center rounded-full border border-[#DB0000] bg-[#FDF0F0] px-3 py-[6px] text-[13px] font-medium text-[#DB0000] hover:bg-[#fde6e6]"
               >
-                Go Premium
-                <span className="ml-1">→</span>
+                Go Premium <span className="ml-1">→</span>
               </button>
             </div>
           </div>
@@ -171,8 +181,8 @@ export default function AccountSettingsModal({
 
           {/* Languages summary */}
           <p className="mb-3 text-[12px] text-[#6b7280]">
-            Add languages you speak and the Roadmap milestones (hours of input per level) will
-            adjust automatically for you.
+            Add languages you speak and the Roadmap milestones (hours of input per
+            level) will adjust automatically for you.
           </p>
 
           {/* Native language */}
@@ -200,7 +210,9 @@ export default function AccountSettingsModal({
                   value={row.language}
                   onChange={(e) =>
                     setOtherLanguages((rows) =>
-                      rows.map((r, i) => (i === idx ? { ...r, language: e.target.value } : r))
+                      rows.map((r, i) =>
+                        i === idx ? { ...r, language: e.target.value } : r
+                      )
                     )
                   }
                 >
@@ -217,7 +229,9 @@ export default function AccountSettingsModal({
                   value={row.level}
                   onChange={(e) =>
                     setOtherLanguages((rows) =>
-                      rows.map((r, i) => (i === idx ? { ...r, level: e.target.value } : r))
+                      rows.map((r, i) =>
+                        i === idx ? { ...r, level: e.target.value } : r
+                      )
                     )
                   }
                 >
@@ -242,14 +256,14 @@ export default function AccountSettingsModal({
             ))}
           </div>
 
-          {/* Add language button (your red outlined pill) */}
+          {/* Add language button */}
           <button
             onClick={addLanguage}
             type="button"
             className="mt-3 inline-flex items-center"
             title="Add a language"
           >
-            <img src="/src/assets/AddLanguage.svg" className="h-[33px]" alt="Add a language" />
+            <img src={addLanguageUrl} className="h-[33px]" alt="Add a language" />
           </button>
 
           {/* Ear for music */}
@@ -291,8 +305,7 @@ export default function AccountSettingsModal({
               onClick={save}
               className="inline-flex items-center rounded-full bg-[#DB0000] px-4 py-2 text-[14px] font-semibold text-white hover:brightness-110"
             >
-              Save changes
-              <span className="ml-1">→</span>
+              Save changes <span className="ml-1">→</span>
             </button>
           </div>
         </div>
@@ -338,7 +351,7 @@ function Input(
     <input
       {...props}
       className={
-        "h-10 w-full rounded-lg border border-[#e5e7eb] bg-white px-3 text-[14px] outline-none " +
+        "h-10 w-full rounded-lg border border-[#e5e7eb] bg-white px-3 text-[14px] text-black outline-none " +
         (props.className ?? "")
       }
     />

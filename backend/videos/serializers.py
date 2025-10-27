@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from pathlib import Path
-from .models import Video, Channel, Tag, Speaker
+from backend.platform.models import Video, Channel, Tag, Speaker
 
 class ChannelSerializer(serializers.ModelSerializer):
     class Meta:

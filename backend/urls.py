@@ -34,6 +34,11 @@ router.register(r'journal', JournalViewSet, basename='journal')
 
 urlpatterns = [
     path('api/', include(router.urls)),
+    # Re-enable legacy platform endpoints under /api/platform/ for compatibility
+        path("api/platform/", include("backend.platform.urls")),
+    # NOTE: platform.urls itself includes the legacy browse/watch/progress patterns.
+    # If you later decide against exposing the old routes, remove the line above.
+    
     # Removed legacy platform routes; platform app retained but URLs disabled.
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     path('admin/', admin.site.urls),

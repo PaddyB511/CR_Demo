@@ -1,88 +1,75 @@
 # backend/platform/utils/formatters.py
-from ..services import db
+from __future__ import annotations
 
-def _iter_tags(conn, video):
-    tags_attr = getattr(video, "tags", None)
-    if callable(tags_attr):
-        try:
-            return list(tags_attr(conn))
-        except TypeError:
-            return list(tags_attr())
-    if hasattr(tags_attr, "all"):
-        return list(tags_attr.all())
-    return []
-
-def _iter_speakers(conn, video):
-    speakers_attr = getattr(video, "speakers", None)
-    if callable(speakers_attr):
-        try:
-            return list(speakers_attr(conn))
-        except TypeError:
-            return list(speakers_attr())
-    if hasattr(speakers_attr, "all"):
-        return list(speakers_attr.all())
-    return []
+from typing import Any, Dict
 
 
 class Formatter:
-    @classmethod
-    def video_simple(cls, conn, video):
-        d = video.to_dict() if hasattr(video, "to_dict") else {
-            "id": getattr(video, "id", None),
-            "platform": getattr(video, "platform", "youtube"),
-            "onPlatformId": getattr(video, "on_platform_id", None),
-            "channel_id": getattr(video, "channel_id", getattr(getattr(video, "channel", None), "id", None)),
-            "duration": getattr(video, "duration", 0),
-            "title": getattr(video, "title", ""),
-            "description": getattr(video, "description", ""),
-            "upload_date": getattr(video, "upload_date", ""),
-            "level": getattr(video, "level", "Beginner"),
-            "premium": getattr(video, "premium", False),
-        }
-        d.pop("onPlatformId", None)
-        channel_id = getattr(video, "channel_id", None) or getattr(getattr(video, "channel", None), "id", None)
-        cid2cname = {c.id: c.name for c in db.Channel.all(conn)}
-        return {
-            **d,
-            "channelName": cid2cname.get(channel_id),
-            "url": f"/watch/{getattr(video, 'id', None)}",
-            "thumbnailUrl": f"/assets/thumbnail/{getattr(video, 'platform', 'youtube')}/{getattr(video, 'id', None)}.webp",
-        }
+    """
+    Minimal formatters used by platform browse endpoints.
+    We keep this defensive so it works with either raw ORM models or
+    any legacy objects that might still be passed in.
+    """
 
-    @classmethod
-    def video_detail(cls, conn, video, tags=None, related_videos=None):
-        d = video.to_dict() if hasattr(video, "to_dict") else {
-            "id": getattr(video, "id", None),
-            "platform": getattr(video, "platform", "youtube"),
-            "onPlatformId": getattr(video, "on_platform_id", None),
-            "channel_id": getattr(video, "channel_id", getattr(getattr(video, "channel", None), "id", None)),
-            "duration": getattr(video, "duration", 0),
-            "title": getattr(video, "title", ""),
-            "description": getattr(video, "description", ""),
-            "upload_date": getattr(video, "upload_date", ""),
-            "level": getattr(video, "level", "Beginner"),
-            "premium": getattr(video, "premium", False),
+    @staticmethod
+    def _get(obj: Any, *names: str, default=None):
+        for n in names:
+            if hasattr(obj, n):
+                val = getattr(obj, n)
+                # resolve callables (legacy accessors)
+                if callable(val):
+                    try:
+                        val = val()
+                    except TypeError:
+                        # some old methods expected args; just skip
+                        pass
+                if val is not None:
+                    return val
+        return default
+
+    @staticmethod
+    def video_simple(_unused_conn: Any, v: Any) -> Dict[str, Any]:
+        """
+        Shape expected by the frontend:
+          id, title, channelName, level, upload_date, premium,
+          thumbnail_url / thumbnailUrl, on_platform_id
+        The UI will fall back to YouTube thumbnail when on_platform_id is present.
+        """
+        vid = Formatter._get(v, "id")
+        title = Formatter._get(v, "title", default="")
+        # Channel name can live in v.channel.name or a denormalized 'channel_name'
+        channel_name = (
+            Formatter._get(v, "channel_name")
+            or (getattr(getattr(v, "channel", None), "name", None))
+            or ""
+        )
+        level = Formatter._get(v, "level", default="")
+        upload_date = Formatter._get(v, "upload_date", default=None)
+        premium = bool(Formatter._get(v, "premium", default=False))
+
+        # thumbnails / ids
+        # try canonical thumbnail field(s)
+        thumb = f"https://img.youtube.com/vi/{getattr(v, 'on_platform_id', '')}/hqdefault.jpg"
+        ret["thumbnailUrl"] = thumb
+        
+        # try various possible field names for the YouTube/platform id
+        on_platform_id = (
+            Formatter._get(v, "on_platform_id")
+            or Formatter._get(v, "youtube_id")
+            or Formatter._get(v, "external_id")
+            or Formatter._get(v, "platform_id")
+            or None
+        )
+
+        # Return both snake_case and camelCase for thumbnail for maximum compatibility
+        return {
+            "id": vid,
+            "title": title,
+            "channelName": channel_name,
+            "level": level,
+            "upload_date": upload_date,
+            "premium": premium,
+            "thumbnail_url": thumb,
+            "thumbnailUrl": thumb,
+            "on_platform_id": on_platform_id,
         }
-        desc = d.get("description")
-        if desc and len(desc) > 300:
-            d["description"] = desc[:300] + "..."
-        tags = tags if tags is not None else _iter_tags(conn, video)
-        ret = {
-            "video": {
-                **d,
-                "url": f"/watch/{getattr(video, 'id', None)}",
-                "thumbnailUrl": f"/assets/thumbnail/{getattr(video, 'platform', 'youtube')}/{getattr(video, 'id', None)}.webp",
-                "tags": [getattr(t, "name", str(t)) for t in tags],
-            }
-        }
-        if related_videos is not None:
-            try:
-                related_videos = sorted(
-                    related_videos,
-                    key=lambda v: getattr(v, "id", None) == getattr(video, "id", None),
-                    reverse=True,
-                )
-            except Exception:
-                pass
-            ret["relatedVideos"] = [cls.video_simple(conn, v) for v in related_videos]
-        return ret

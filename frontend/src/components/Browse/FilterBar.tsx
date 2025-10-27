@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 
+/* ---------- Types ---------- */
 export type LevelOption = { id: string; label: string };
 export type SpeakerOption = { id: string; label: string };
 
@@ -19,6 +20,22 @@ type Props = {
   onClearAllTags: () => void;
 };
 
+/* ---------- SVG imports (Vite will fingerprint these) ---------- */
+import sortBy from "@/assets/browse/SortBy.svg";
+import level from "@/assets/browse/Level.svg";
+import speaker from "@/assets/browse/Speaker.svg";
+import channel from "@/assets/browse/Channel.svg";
+import topics from "@/assets/browse/Topics.svg";
+import duration from "@/assets/browse/Duration.svg";
+import hideWatched from "@/assets/browse/HideWatched.svg";
+import searchSym from "@/assets/browse/SearchSym.svg";
+
+/* Symbols shown inside selected chips */
+import levelSym from "@/assets/browse/LevelSym.svg";
+import speakerSym from "@/assets/browse/SpeakerSym.svg";
+
+/* ====================================================================== */
+
 export default function FilterBar({
   levels,
   speakers,
@@ -27,6 +44,8 @@ export default function FilterBar({
   onClearAllTags,
 }: Props) {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [openLevel, setOpenLevel] = useState(false);
+  const [openSpeaker, setOpenSpeaker] = useState(false);
 
   const selectedLevelChips = useMemo(
     () => levels.filter((l) => state.selectedLevels.includes(l.id)),
@@ -42,6 +61,7 @@ export default function FilterBar({
       ...state,
       selectedLevels: state.selectedLevels.filter((x) => x !== id),
     });
+
   const clearSpeaker = (id: string) =>
     onChange({
       ...state,
@@ -50,87 +70,149 @@ export default function FilterBar({
 
   return (
     <div className="bg-surface rounded-card border border-border shadow-card px-3 md:px-4 py-3">
-      {/* Top row */}
-      <div className="flex items-center gap-2 md:gap-3">
-        <button className="inline-flex items-center gap-2 px-3 py-2 rounded-pill bg-surface-muted text-gray-700 text-sm">
-          <span>⇅</span>
-          <span>Sort by</span>
-        </button>
-        <MenuSelect
-          label="Level"
-          valueIds={state.selectedLevels}
-          options={levels}
-          onToggle={(id) => {
-            const exists = state.selectedLevels.includes(id);
-            onChange({
-              ...state,
-              selectedLevels: exists
-                ? state.selectedLevels.filter((x) => x !== id)
-                : [...state.selectedLevels, id],
-            });
-          }}
-          kind="primary"
+      {/* Top row – SVGs are the buttons themselves */}
+      <div className="flex items-center gap-4">
+        {/* SortBy (non-interactive placeholder for now) */}
+        <img
+          src={sortBy}
+          alt="Sort by"
+          className="h-8 cursor-default select-none"
+          draggable={false}
         />
-        <MenuSelect
-          label="Speaker"
-          valueIds={state.selectedSpeakers}
-          options={speakers}
-          onToggle={(id) => {
-            const exists = state.selectedSpeakers.includes(id);
-            onChange({
-              ...state,
-              selectedSpeakers: exists
-                ? state.selectedSpeakers.filter((x) => x !== id)
-                : [...state.selectedSpeakers, id],
-            });
-          }}
-          kind="primary"
-        />
-        <button
-          className="ml-auto md:hidden inline-flex items-center gap-2 px-3 py-2 rounded-pill bg-surface-muted text-gray-700 text-sm"
-          onClick={() => setMobileOpen(true)}
-        >
-          More •••
-        </button>
-        <div className="hidden md:flex items-center gap-2 ml-auto">
-          <label className="inline-flex items-center gap-2 px-3 py-2 rounded-pill bg-surface-muted text-gray-700 text-sm">
-            {/* <span role="img" aria-label="hide">
-              // 🙈
-            </span> */}
-            <input
-              type="checkbox"
-              className="accent-red-600"
-              checked={state.hideWatched}
-              onChange={(e) =>
-                onChange({ ...state, hideWatched: e.target.checked })
-              }
-            />
-            Hide watched
-          </label>
-          <div className="relative">
-            <input
-              className="pl-9 pr-8 py-2 rounded-pill bg-surface-muted text-sm outline-none w-64"
-              placeholder="Search"
-              value={state.query}
-              onChange={(e) => onChange({ ...state, query: e.target.value })}
-            />
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-              🔎
-            </span>
-            {state.query && (
-              <button
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400"
-                onClick={() => onChange({ ...state, query: "" })}
-                aria-label="Clear search"
-              >
-                ×
-              </button>
-            )}
-          </div>
+
+        {/* Level (opens small menu) */}
+        <div className="relative">
+          <img
+            src={level}
+            alt="Level"
+            className="h-8 cursor-pointer select-none"
+            onClick={() => {
+              setOpenLevel((v) => !v);
+              setOpenSpeaker(false);
+            }}
+            draggable={false}
+          />
+          {openLevel && (
+            <div className="absolute z-20 mt-2 w-56 bg-surface rounded-card-sm border border-border shadow-card p-2 max-h-64 overflow-auto">
+              {levels.map((l) => {
+                const active = state.selectedLevels.includes(l.id);
+                return (
+                  <label
+                    key={l.id}
+                    className={`flex items-center gap-2 px-2 py-1 rounded-card-sm hover:bg-surface-muted cursor-pointer ${
+                      active ? "text-brand" : "text-gray-800"
+                    }`}
+                  >
+                    <input
+                      type="checkbox"
+                      className="accent-red-600"
+                      checked={active}
+                      onChange={() => {
+                        const exists = state.selectedLevels.includes(l.id);
+                        onChange({
+                          ...state,
+                          selectedLevels: exists
+                            ? state.selectedLevels.filter((x) => x !== l.id)
+                            : [...state.selectedLevels, l.id],
+                        });
+                      }}
+                    />
+                    <span className="text-sm">{l.label}</span>
+                  </label>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
+        {/* Speaker (opens small menu) */}
+        <div className="relative">
+          <img
+            src={speaker}
+            alt="Speaker"
+            className="h-8 cursor-pointer select-none"
+            onClick={() => {
+              setOpenSpeaker((v) => !v);
+              setOpenLevel(false);
+            }}
+            draggable={false}
+          />
+          {openSpeaker && (
+            <div className="absolute z-20 mt-2 w-64 bg-surface rounded-card-sm border border-border shadow-card p-2 max-h-64 overflow-auto">
+              {speakers.map((s) => {
+                const active = state.selectedSpeakers.includes(s.id);
+                return (
+                  <label
+                    key={s.id}
+                    className={`flex items-center gap-2 px-2 py-1 rounded-card-sm hover:bg-surface-muted cursor-pointer ${
+                      active ? "text-brand" : "text-gray-800"
+                    }`}
+                  >
+                    <input
+                      type="checkbox"
+                      className="accent-red-600"
+                      checked={active}
+                      onChange={() => {
+                        const exists = state.selectedSpeakers.includes(s.id);
+                        onChange({
+                          ...state,
+                          selectedSpeakers: exists
+                            ? state.selectedSpeakers.filter((x) => x !== s.id)
+                            : [...state.selectedSpeakers, s.id],
+                        });
+                      }}
+                    />
+                    <span className="text-sm">{s.label}</span>
+                  </label>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
+        {/* Channel / Topics / Duration – static SVG buttons for now */}
+        <img src={channel} alt="Channel" className="h-8 select-none" draggable={false} />
+        <img src={topics} alt="Topics" className="h-8 select-none" draggable={false} />
+        <img src={duration} alt="Duration" className="h-8 select-none" draggable={false} />
+
+        {/* Hide watched toggle */}
+        <label className="ml-2 inline-flex items-center gap-2">
+          <img src={hideWatched} alt="Hide watched" className="h-8 select-none" />
+          <input
+            type="checkbox"
+            className="accent-red-600"
+            checked={state.hideWatched}
+            onChange={(e) => onChange({ ...state, hideWatched: e.target.checked })}
+          />
+        </label>
+
+        {/* Search with SVG icon and black text */}
+        <div className="ml-auto relative">
+          <img
+            src={searchSym}
+            alt="Search"
+            className="absolute left-3 top-1/2 -translate-y-1/2 h-[14px] w-[14px] opacity-70 pointer-events-none select-none"
+            draggable={false}
+          />
+          <input
+            className="pl-8 pr-8 py-2 rounded-full bg-surface-muted text-sm text-black outline-none w-64"
+            placeholder="Search"
+            value={state.query}
+            onChange={(e) => onChange({ ...state, query: e.target.value })}
+          />
+          {state.query && (
+            <button
+              className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400"
+              onClick={() => onChange({ ...state, query: "" })}
+              aria-label="Clear search"
+            >
+              ×
+            </button>
+          )}
         </div>
       </div>
 
-      {/* Tags row */}
+      {/* Selected tags row */}
       <div className="mt-3 flex flex-wrap items-center gap-2 md:gap-3">
         {selectedLevelChips.length > 0 || selectedSpeakerChips.length > 0 ? (
           <button
@@ -142,12 +224,14 @@ export default function FilterBar({
         ) : (
           <span className="text-sm text-gray-400">No tags</span>
         )}
+
         {selectedLevelChips.map((l) => (
           <Chip
             key={l.id}
             label={l.label}
             onRemove={() => clearLevel(l.id)}
-            icon="📶"
+            iconSrc={levelSym}
+            iconAlt="Level"
           />
         ))}
         {selectedSpeakerChips.map((s) => (
@@ -155,12 +239,13 @@ export default function FilterBar({
             key={s.id}
             label={s.label}
             onRemove={() => clearSpeaker(s.id)}
-            icon="👤"
+            iconSrc={speakerSym}
+            iconAlt="Speaker"
           />
         ))}
       </div>
 
-      {/* Mobile drawer */}
+      {/* Mobile drawer (same behavior as before) */}
       {mobileOpen && (
         <div className="fixed inset-0 z-50 flex">
           <div className="ml-auto h-full w-[88%] max-w-sm bg-white shadow-xl p-4 overflow-y-auto">
@@ -174,6 +259,7 @@ export default function FilterBar({
                 ×
               </button>
             </div>
+
             <div className="mt-4 space-y-4">
               <label className="flex items-center justify-between px-3 py-2 rounded-pill bg-surface-muted">
                 <span className="text-gray-700">Hide watched</span>
@@ -181,24 +267,18 @@ export default function FilterBar({
                   type="checkbox"
                   className="accent-red-600"
                   checked={state.hideWatched}
-                  onChange={(e) =>
-                    onChange({ ...state, hideWatched: e.target.checked })
-                  }
+                  onChange={(e) => onChange({ ...state, hideWatched: e.target.checked })}
                 />
               </label>
+
               <div className="relative">
                 <div className="text-sm text-gray-500 mb-1">Search</div>
                 <input
-                  className="pl-9 pr-8 py-2 rounded-pill bg-surface-muted text-sm outline-none w-full"
+                  className="pl-3 pr-8 py-2 rounded-pill bg-surface-muted text-sm text-black outline-none w-full"
                   placeholder="Search"
                   value={state.query}
-                  onChange={(e) =>
-                    onChange({ ...state, query: e.target.value })
-                  }
+                  onChange={(e) => onChange({ ...state, query: e.target.value })}
                 />
-                {/* <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-                  🔎
-                </span> */}
                 {state.query && (
                   <button
                     className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400"
@@ -284,18 +364,29 @@ export default function FilterBar({
   );
 }
 
+/* ---------------- Small helpers ---------------- */
+
 function Chip({
   label,
   onRemove,
-  icon,
+  iconSrc,
+  iconAlt,
 }: {
   label: string;
   onRemove: () => void;
-  icon?: string;
+  iconSrc?: string;
+  iconAlt?: string;
 }) {
   return (
     <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-pill bg-chip-selected border border-chip-selected text-brand text-sm">
-      {icon && <span className="opacity-70">{icon}</span>}
+      {iconSrc && (
+        <img
+          src={iconSrc}
+          alt={iconAlt || ""}
+          className="h-[14px] w-[14px] opacity-80"
+          draggable={false}
+        />
+      )}
       <span>{label}</span>
       <button
         onClick={onRemove}
@@ -305,56 +396,6 @@ function Chip({
         ×
       </button>
     </span>
-  );
-}
-
-function MenuSelect({
-  label,
-  options,
-  valueIds,
-  onToggle,
-  kind = "muted",
-}: {
-  label: string;
-  options: { id: string; label: string }[];
-  valueIds: string[];
-  onToggle: (id: string) => void;
-  kind?: "primary" | "muted";
-}) {
-  const [open, setOpen] = useState(false);
-  return (
-    <div className="relative">
-      <button
-        className={`inline-flex items-center gap-2 px-3 py-2 rounded-pill border text-sm ${
-          valueIds.length
-            ? "border-chip-selected text-brand bg-chip-selected"
-            : kind === "primary"
-            ? "border-brand text-brand bg-surface"
-            : "border-border text-gray-700 bg-surface"
-        }`}
-        onClick={() => setOpen((v) => !v)}
-      >
-        {label} ▾
-      </button>
-      {open && (
-        <div className="absolute z-10 mt-1 w-56 bg-surface rounded-card-sm border border-border shadow-card p-2 max-h-64 overflow-auto">
-          {options.map((o) => (
-            <label
-              key={o.id}
-              className="flex items-center gap-2 px-2 py-1 rounded-card-sm hover:bg-surface-muted cursor-pointer"
-            >
-              <input
-                type="checkbox"
-                className="accent-red-600"
-                checked={valueIds.includes(o.id)}
-                onChange={() => onToggle(o.id)}
-              />
-              <span className="text-sm text-gray-800">{o.label}</span>
-            </label>
-          ))}
-        </div>
-      )}
-    </div>
   );
 }
 
