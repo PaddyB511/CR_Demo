@@ -296,48 +296,50 @@ export default function BrowsePage() {
           )}
         </div>
 
-        <section className="mt-8">
-          <div className="flex items-center justify-between">
+        <div className="mt-6 rounded-card border-[3px] border-white bg-surface shadow-card p-4">
+          <section>
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl md:text-2xl font-semibold text-gray-900">
+                Recommended
+              </h2>
+            </div>
+            <RecommendedRail items={videos.slice(0, 6)} />
+          </section>
+
+          <section className="mt-8">
             <h2 className="text-xl md:text-2xl font-semibold text-gray-900">
-              Recommended
+              All
             </h2>
-          </div>
-          <RecommendedRail items={videos.slice(0, 6)} />
-        </section>
+            <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {loading && <div className="text-sm text-gray-500">Loading…</div>}
+              {error && <div className="text-sm text-red-600">{error}</div>}
+              {!loading &&
+                !error &&
+                videos.map((v) => (
+                  <Link key={v.id} to={`/watch/${v.id}`} className="block">
+                    <VideoCard item={v} />
+                  </Link>
+                ))}
+            </div>
 
-        <section className="mt-6">
-          <h2 className="text-xl md:text-2xl font-semibold text-gray-900">
-            All
-          </h2>
-          <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {loading && <div className="text-sm text-gray-500">Loading…</div>}
-            {error && <div className="text-sm text-red-600">{error}</div>}
-            {!loading &&
-              !error &&
-              videos.map((v) => (
-                <Link key={v.id} to={`/watch/${v.id}`} className="block">
-                  <VideoCard item={v} />
-                </Link>
-              ))}
-          </div>
-
-          <div className="mt-4 flex gap-2">
-            <button
-              disabled={page === 1 || loading}
-              onClick={() => setPage((p) => Math.max(1, p - 1))}
-              className="rounded-full bg-surface-muted px-3 py-1 disabled:opacity-50"
-            >
-              Prev
-            </button>
-            <button
-              disabled={!hasMore || loading}
-              onClick={() => setPage((p) => p + 1)}
-              className="rounded-full bg-surface-muted px-3 py-1 disabled:opacity-50"
-            >
-              Next
-            </button>
-          </div>
-        </section>
+            <div className="mt-4 flex gap-2">
+              <button
+                disabled={page === 1 || loading}
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                className="rounded-full bg-surface-muted px-3 py-1 disabled:opacity-50"
+              >
+                Prev
+              </button>
+              <button
+                disabled={!hasMore || loading}
+                onClick={() => setPage((p) => p + 1)}
+                className="rounded-full bg-surface-muted px-3 py-1 disabled:opacity-50"
+              >
+                Next
+              </button>
+            </div>
+          </section>
+        </div>
       </div>
     </div>
   );

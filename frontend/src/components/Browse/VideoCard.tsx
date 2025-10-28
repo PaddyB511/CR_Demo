@@ -1,3 +1,5 @@
+import calendarIcon from "@/assets/browse/Calendar.svg";
+
 export type VideoItem = {
   id: string;
   title: string;
@@ -11,7 +13,7 @@ export type VideoItem = {
 
 export default function VideoCard({ item }: { item: VideoItem }) {
   return (
-    <article className="bg-surface rounded-card border border-border shadow-card overflow-hidden">
+    <article className="bg-surface rounded-card shadow-card overflow-hidden">
       <div className="relative aspect-[16/9] bg-surface-muted">
         <img
           src={item.thumbnail}
@@ -29,26 +31,24 @@ export default function VideoCard({ item }: { item: VideoItem }) {
       </div>
       <div className="p-3">
         <div className="flex items-center gap-2 text-[12px] mb-2">
-          <span className="inline-flex items-center gap-1 px-2 py-1 rounded-pill bg-chip-selected text-brand border border-chip-selected">
+          <span className="inline-flex items-center gap-2 px-3 py-1 rounded-pill bg-chip-selected text-brand border border-chip-selected font-inter font-semibold">
             <span role="img" aria-label="channel">
               👤
-            </span>{" "}
+            </span>
             {item.channel}
           </span>
-          <span className="inline-flex items-center gap-1 px-2 py-1 rounded-pill bg-inter2 text-inter2-foreground">
+          <span className="inline-flex items-center gap-2 px-3 py-1 rounded-pill bg-inter2 text-inter2-foreground font-inter font-semibold">
             {item.levelLabel}
           </span>
-          <button className="ml-auto text-gray-400 hover:text-gray-600">
+          <button className="ml-auto text-gray-400 hover:text-gray-600" aria-label="Video actions">
             ⋮
           </button>
         </div>
-        <h3 className="text-[15px] font-semibold text-gray-900 leading-snug line-clamp-2">
+        <h3 className="text-[16px] font-semibold text-gray-900 leading-snug line-clamp-2 font-inter">
           {item.title}
         </h3>
-        <div className="mt-2 text-[12px] text-gray-400 flex items-center gap-1">
-          <span role="img" aria-label="published">
-            📅
-          </span>
+        <div className="mt-3 text-[12px] text-[#D9D9D9] flex items-center gap-2 font-inter">
+          <img src={calendarIcon} alt="Published date" className="h-3.5 w-3.5" loading="lazy" />
           Published on {item.published}
         </div>
       </div>
