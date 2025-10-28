@@ -1,4 +1,5 @@
 import axios from "axios";
+import { Paginated } from "./types";
 
 export type ApiVideo = {
   id: number;
@@ -18,13 +19,6 @@ export type ApiVideo = {
   speakerNames: string[];
   thumbnailUrl: string;
   related?: ApiVideo[]; // detail only
-};
-
-export type Paginated<T> = {
-  count: number;
-  next: string | null;
-  previous: string | null;
-  results: T[];
 };
 
 export interface BrowseFilters {

@@ -43,3 +43,13 @@ def camel_to_snake(name: str) -> str:
     """Convert camelCase / PascalCase to snake_case."""
     s1 = re.sub(r'(.)([A-Z][a-z]+)', r'\1_\2', name)
     return re.sub(r'([a-z0-9])([A-Z])', r'\1_\2', s1).lower()
+
+
+def parse_comma_separated_string(value: str | None) -> list[str]:
+    """Split a comma-separated query parameter into individual values."""
+
+    if not value:
+        return []
+
+    parts = [segment.strip() for segment in value.split(",")]
+    return [segment for segment in parts if segment]

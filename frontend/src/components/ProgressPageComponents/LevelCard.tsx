@@ -34,7 +34,7 @@ const LevelCard = () => {
 
       {/* Progress Bar */}
       <div className="mt-2">
-        <LinearProgress percent={28} />
+        <LinearProgress percent={0} />
         <div className="mt-3 text-sm text-black text-left">
           Here is a short description of the level, in one or two sentences. We
           already know how to do this! Cool!

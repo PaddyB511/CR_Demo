@@ -54,9 +54,9 @@ def first_of(*keys):
 
 
 GET_YT   = first_of("Youtube Link", "YouTube Link", "youtube", "youtube_id", "url", "link")
-GET_T    = first_of("Title", "Video Title", "Name")
+GET_T    = first_of("Title", "Video Title", "Video Name on Youtube", "Name")
 GET_D    = first_of("Description", "Desc")
-GET_DATE = first_of("UploadDate", "Upload Date", "Date")
+GET_DATE = first_of("UploadDate", "Upload Date", "PublishDate", "Publish Date", "Date")
 GET_DUR  = first_of("Duration", "Length")
 GET_LVL  = first_of("Level")
 GET_ACC  = first_of("Access", "Premium", "Free/Premium")

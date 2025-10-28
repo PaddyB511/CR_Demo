@@ -65,8 +65,8 @@ const ProgressPage = () => {
   }, [isAuthenticated, getAccessTokenSilently]);
 
   return (
-    <>
-      <div className="flex flex-col mx-10">
+    <div className="min-h-screen bg-[#F6F6F6]">
+      <main className="flex flex-col flex-1 mx-10 pb-10">
         <div className="grid grid-cols-2 grid-rows-[253px_200px] md:grid-cols-[44fr_56fr] gap-x-[35px] gap-y-[35px]">
           <div className="row-start-1 col-start-1">
             <LevelCard />
@@ -88,8 +88,8 @@ const ProgressPage = () => {
         </div>
         <hr className="my-8 border-t border-gray-200" />
         <GoalSetter />
-      </div>
-    </>
+      </main>
+    </div>
   );
 };
 

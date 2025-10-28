@@ -12,7 +12,7 @@ const TotalInputCard = () => {
         {/* Left column */}
         <div className="max-w-xl space-y-[25px] text-left justify-self-start">
           <h2 className="font-inter font-bold text-[22px] leading-[22px] text-black">
-            Total Input <span className="text-[#DB0000]">28 hrs 28 min</span>
+            Total Input <span className="text-[#DB0000]">0 hrs 0 min</span>
           </h2>
 
           <p className="text-[13px] leading-[13px] text-black">

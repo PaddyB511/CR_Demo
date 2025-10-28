@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import Card from "./Card";
 import letterBottom from "../../assets/bottomLetter.svg";
 import topLetterPart from "../../assets/topLetterPart.svg";
@@ -17,9 +18,12 @@ export const JournalCard = () => {
               <strong>outside of Comprehensible Russian</strong> to see your
               real progress!
             </div>
-            <button className="flex flex-row justify-center items-center px-9 py-2 gap-[9.05px] bg-[#F6F6F6] text-[#9C9C9C] font-semibold rounded-full text-[12px] leading-[12px]">
+            <Link
+              to="/journal"
+              className="flex flex-row justify-center items-center px-9 py-2 gap-[9.05px] bg-[#F6F6F6] text-[#9C9C9C] font-semibold rounded-full text-[12px] leading-[12px] hover:bg-[#ebebeb]"
+            >
               Go now
-            </button>
+            </Link>
             {/* </div> */}
           </div>
           <div className="flex flex-col justify-between px-5 py-3 bg-[#FDF0F0] border-l border-pink-100 rounded-[14px]">
@@ -27,7 +31,9 @@ export const JournalCard = () => {
               <div className="text-[12px] font-semibold text-[#db0000]">
                 Quick note
               </div>
-              <div className="text-[12px] font-inter font-semibold text-[#F7ACAC]">19/8/2025</div>
+              <div className="text-[12px] font-inter font-semibold text-[#F7ACAC]">
+                19/8/2025
+              </div>
             </div>
             <div className="mt-2 text-[12px] text-gray-700 text-start">
               Tell us how much input you have received outside of Comprehensible
@@ -46,17 +52,17 @@ export const JournalCard = () => {
         </div>
       </div>
       <img
-          src={letterBottom}
-          alt=""
-          aria-hidden
-          className="pointer-events-none absolute bottom-0 left-1/4"
-        />
-        <img
-          src={topLetterPart}
-          alt=""
-          aria-hidden
-          className="pointer-events-none absolute top-0 left-1/2 -translate-x-full"
-        />
+        src={letterBottom}
+        alt=""
+        aria-hidden
+        className="pointer-events-none absolute bottom-0 left-1/4"
+      />
+      <img
+        src={topLetterPart}
+        alt=""
+        aria-hidden
+        className="pointer-events-none absolute top-0 left-1/2 -translate-x-full"
+      />
     </Card>
   );
 };
