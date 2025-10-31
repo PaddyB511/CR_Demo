@@ -26,6 +26,9 @@ type Props = {
   state: FilterState;
   onChange: (next: FilterState) => void;
   onClearAllTags: () => void;
+  resultCount: number;
+  totalDurationSeconds: number;
+  loadingResults: boolean;
 };
 
 /* ---------- SVG imports (Vite will fingerprint these) ---------- */
@@ -52,6 +55,9 @@ export default function FilterBar({
   state,
   onChange,
   onClearAllTags,
+  resultCount,
+  totalDurationSeconds,
+  loadingResults,
 }: Props) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [openMenu, setOpenMenu] = useState<
@@ -91,6 +97,14 @@ export default function FilterBar({
     [topics, state.selectedTopics]
   );
 
+  const hasActiveFilters =
+    selectedLevelChips.length > 0 ||
+    selectedSpeakerChips.length > 0 ||
+    selectedChannelChips.length > 0 ||
+    selectedTopicChips.length > 0 ||
+    state.minDuration !== null ||
+    state.maxDuration !== null;
+
   const clearLevel = (id: string) =>
     onChange({
       ...state,
@@ -117,6 +131,13 @@ export default function FilterBar({
 
   const toggleMenu = (key: NonNullable<typeof openMenu>) =>
     setOpenMenu((current) => (current === key ? null : key));
+
+  const summaryText = useMemo(() => {
+    if (loadingResults) return "All results: loading…";
+    const videosLabel = resultCount === 1 ? "video" : "videos";
+    const durationLabel = formatDurationLabel(totalDurationSeconds);
+    return `All results: ${resultCount} ${videosLabel} · ${durationLabel} total`;
+  }, [loadingResults, resultCount, totalDurationSeconds]);
 
   return (
     <div className="bg-surface rounded-card border border-border shadow-card px-3 md:px-4 py-3">
@@ -419,55 +440,63 @@ export default function FilterBar({
 
       {/* Selected tags row */}
       <div className="mt-3 flex flex-wrap items-center gap-2 md:gap-3">
-        {selectedLevelChips.length > 0 ||
-        selectedSpeakerChips.length > 0 ||
-        selectedChannelChips.length > 0 ||
-        selectedTopicChips.length > 0 ||
-        state.minDuration !== null ||
-        state.maxDuration !== null ? (
+        <span className="order-first basis-full text-left text-xs text-[#D9D9D9] font-inter md:order-none md:basis-auto md:mr-auto">
+          {summaryText}
+        </span>
+
+        {hasActiveFilters && (
           <button
             onClick={onClearAllTags}
-            className="inline-flex items-center gap-1 text-sm text-gray-500 hover;text-gray-700"
+            className="text-sm text-gray-600 underline decoration-dotted underline-offset-4"
+            type="button"
           >
-            ×
+            Clear all
           </button>
-        ) : (
-          <span className="text-sm text-gray-400">No tags</span>
         )}
 
-        {selectedLevelChips.map((l) => (
+        {selectedLevelChips.map((chip) => (
           <Chip
-            key={l.id}
-            label={l.label}
-            onRemove={() => clearLevel(l.id)}
+            key={`level-${chip.id}`}
+            label={chip.label}
+            onRemove={() => clearLevel(chip.id)}
             iconSrc={levelSym}
             iconAlt="Level"
           />
         ))}
-        {selectedSpeakerChips.map((s) => (
+        {selectedSpeakerChips.map((chip) => (
           <Chip
-            key={s.id}
-            label={s.label}
-            onRemove={() => clearSpeaker(s.id)}
+            key={`speaker-${chip.id}`}
+            label={chip.label}
+            onRemove={() => clearSpeaker(chip.id)}
             iconSrc={speakerSym}
             iconAlt="Speaker"
           />
         ))}
-        {selectedChannelChips.map((c) => (
-          <Chip key={c.id} label={c.label} onRemove={() => clearChannel(c.id)} />
+        {selectedChannelChips.map((chip) => (
+          <Chip
+            key={`channel-${chip.id}`}
+            label={chip.label}
+            onRemove={() => clearChannel(chip.id)}
+          />
         ))}
-        {selectedTopicChips.map((t) => (
-          <Chip key={t.id} label={t.label} onRemove={() => clearTopic(t.id)} />
+        {selectedTopicChips.map((chip) => (
+          <Chip
+            key={`topic-${chip.id}`}
+            label={chip.label}
+            onRemove={() => clearTopic(chip.id)}
+          />
         ))}
         {state.minDuration !== null && (
           <Chip
-            label={`Min ${state.minDuration}s`}
+            key="min-duration"
+            label={`Min: ${state.minDuration}s`}
             onRemove={() => onChange({ ...state, minDuration: null })}
           />
         )}
         {state.maxDuration !== null && (
           <Chip
-            label={`Max ${state.maxDuration}s`}
+            key="max-duration"
+            label={`Max: ${state.maxDuration}s`}
             onRemove={() => onChange({ ...state, maxDuration: null })}
           />
         )}
@@ -707,6 +736,22 @@ export default function FilterBar({
 }
 
 /* ---------------- Small helpers ---------------- */
+
+function formatDurationLabel(totalSeconds: number): string {
+  if (!Number.isFinite(totalSeconds) || totalSeconds <= 0) {
+    return "0s";
+  }
+  const rounded = Math.round(totalSeconds);
+  const hours = Math.floor(rounded / 3600);
+  const minutes = Math.floor((rounded % 3600) / 60);
+  const seconds = rounded % 60;
+  const parts: string[] = [];
+  if (hours > 0) parts.push(`${hours}h`);
+  if (minutes > 0) parts.push(`${minutes}m`);
+  if (parts.length === 0 && seconds > 0) parts.push(`${seconds}s`);
+  if (parts.length === 0) return "0s";
+  return parts.join(" ");
+}
 
 function Chip({
   label,

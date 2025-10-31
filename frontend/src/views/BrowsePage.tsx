@@ -86,6 +86,22 @@ function mapVideo(v: any): VideoItem {
   const level = v.level ?? v.levelLabel ?? "";
   const channel = v.channel_name ?? v.channelName ?? v.channel ?? "";
   const date = v.upload_date ?? v.published ?? v.publish_date ?? v.PublishDate ?? "";
+  const rawDuration =
+    v.duration ??
+    v.duration_seconds ??
+    v.durationSeconds ??
+    v.seconds ??
+    v.length ??
+    v.metadata?.duration;
+  let durationSeconds: number | null = null;
+  if (typeof rawDuration === "number" && Number.isFinite(rawDuration)) {
+    durationSeconds = rawDuration;
+  } else if (typeof rawDuration === "string" && rawDuration.trim()) {
+    const parsed = Number(rawDuration.trim());
+    if (!Number.isNaN(parsed) && Number.isFinite(parsed)) {
+      durationSeconds = parsed;
+    }
+  }
   const title = coalesceTitle(
     v.title,
     v.name,
@@ -119,6 +135,7 @@ function mapVideo(v: any): VideoItem {
     published: date,
     premium: Boolean(v.premium),
     thumbnail: thumb || "/placeholder-thumb.png", // add a tiny local placeholder if you want
+    durationSeconds,
   };
 }
 
@@ -192,6 +209,15 @@ export default function BrowsePage() {
   const [speakerError, setSpeakerError] = useState<string | null>(null);
 
   const listQS = useMemo(() => toQueryString(filters, page), [filters, page]);
+
+  const totalDurationSeconds = useMemo(
+    () =>
+      videos.reduce((total, video) => {
+        const duration = video.durationSeconds ?? 0;
+        return total + (Number.isFinite(duration) ? duration : 0);
+      }, 0),
+    [videos]
+  );
 
   // Load speakers (public)
   useEffect(() => {
@@ -287,6 +313,9 @@ export default function BrowsePage() {
               setFilters(next);
             }}
             onClearAllTags={onClearAllTags}
+            resultCount={videos.length}
+            totalDurationSeconds={totalDurationSeconds}
+            loadingResults={loading}
           />
           {loadingSpeakers && (
             <div className="mt-2 text-xs text-gray-400">Loading speakers…</div>

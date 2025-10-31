@@ -1,8 +1,12 @@
 import csv
 from datetime import date
-from urllib.parse import urlparse, parse_qs
+from urllib.parse import parse_qs, urlparse
+
 from django.core.management.base import BaseCommand
 from django.db import transaction
+
+from yt_dlp import YoutubeDL
+from yt_dlp.utils import DownloadError
 
 from backend.platform.models import Channel, Speaker, Tag, Video
 
@@ -65,6 +69,46 @@ GET_SP   = first_of("Speaker", "Speakers")
 GET_CH   = first_of("Channel")
 
 
+_YDL_OPTIONS = {
+    "quiet": True,
+    "skip_download": True,
+    "no_warnings": True,
+    "nocheckcertificate": True,
+}
+
+_duration_cache: dict[str, int] = {}
+
+
+def fetch_youtube_duration(ytid: str) -> int:
+    if not ytid:
+        return 0
+    if ytid in _duration_cache:
+        return _duration_cache[ytid]
+
+    url = f"https://www.youtube.com/watch?v={ytid}"
+    try:
+        with YoutubeDL(_YDL_OPTIONS) as ydl:
+            info = ydl.extract_info(url, download=False)
+    except DownloadError:
+        return 0
+    except Exception:
+        return 0
+
+    duration = info.get("duration")
+    if duration is None:
+        duration = parse_int_duration(info.get("duration_string"))
+
+    if duration is None:
+        duration = 0
+
+    duration_int = int(duration) if duration else 0
+    if duration_int < 0:
+        duration_int = 0
+
+    _duration_cache[ytid] = duration_int
+    return duration_int
+
+
 class Command(BaseCommand):
     help = "Import/update videos from a CSV into the DB"
 
@@ -101,7 +145,15 @@ class Command(BaseCommand):
                 title = (GET_T(row) or "").strip()
                 description = (GET_D(row) or "").strip()
                 upload_date = (GET_DATE(row) or "").strip() or date.today().isoformat()
-                duration = parse_int_duration(GET_DUR(row))
+                csv_duration = parse_int_duration(GET_DUR(row))
+                yt_duration = fetch_youtube_duration(ytid)
+                duration = yt_duration or csv_duration
+                if yt_duration and csv_duration and abs(yt_duration - csv_duration) > 1:
+                    self.stdout.write(
+                        self.style.NOTICE(
+                            f"[row {i}] duration corrected via YouTube: CSV={csv_duration}s, YouTube={yt_duration}s"
+                        )
+                    )
 
                 level = (GET_LVL(row) or "Beginner").strip().title()
                 access = (GET_ACC(row) or "free").strip().lower()

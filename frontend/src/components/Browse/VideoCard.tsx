@@ -9,6 +9,7 @@ export type VideoItem = {
   published: string; // YYYY-MM-DD
   premium?: boolean;
   thumbnail: string;
+  durationSeconds?: number | null;
 };
 
 export default function VideoCard({ item }: { item: VideoItem }) {

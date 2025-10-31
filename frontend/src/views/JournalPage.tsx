@@ -4,6 +4,7 @@ import { useAuth0 } from "@auth0/auth0-react";
 
 import MobileBottomNav from "../components/layout/MobileBottomNav";
 import { fetchJournalEntries, ApiJournalEntry, JournalActivity } from "../api/journal";
+import ProgressNoteModal, { ProgressNoteFormData } from "../components/journal/ProgressNoteModal";
 
 const activityLabels: Record<JournalActivity, string> = {
   listening_watching: "Listening/Watching",
@@ -57,6 +58,7 @@ const JournalPage = () => {
   const [entries, setEntries] = useState<ApiJournalEntry[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showProgressModal, setShowProgressModal] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -111,7 +113,19 @@ const JournalPage = () => {
     commented: Boolean(entry.comment && entry.comment.trim().length > 0),
   }));
 
-  const addNoteDisabled = authLoading || !isAuthenticated;
+  const addNoteDisabled = authLoading;
+
+  const handleOpenModal = () => {
+    setShowProgressModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setShowProgressModal(false);
+  };
+
+  const handleSaveProgressNote = (data: ProgressNoteFormData) => {
+    setShowProgressModal(false);
+  };
 
   return (
     <div className="min-h-screen bg-[#f6f6f6] flex flex-col">
@@ -139,6 +153,7 @@ const JournalPage = () => {
               }`}
               type="button"
               disabled={addNoteDisabled}
+              onClick={handleOpenModal}
             >
               <span>Add a progress note</span>
               <img
@@ -250,6 +265,11 @@ const JournalPage = () => {
         </div>
       </main>
       <MobileBottomNav />
+      <ProgressNoteModal
+        open={showProgressModal}
+        onClose={handleCloseModal}
+        onSave={handleSaveProgressNote}
+      />
     </div>
   );
 };

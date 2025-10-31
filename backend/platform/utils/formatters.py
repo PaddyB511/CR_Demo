@@ -149,6 +149,12 @@ class Formatter:
             platform = Formatter._get(video, "platform", default="youtube") or "youtube"
             thumb = f"/assets/thumbnail/{platform}/{vid}.webp"
 
+        duration = Formatter._get(video, "duration", "length", "video_length", default=0)
+        try:
+            duration_int = int(duration)
+        except (TypeError, ValueError):
+            duration_int = 0
+
         payload = {
             "id": vid,
             "title": title or "Untitled video",
@@ -160,6 +166,7 @@ class Formatter:
             "thumbnail_url": thumb,
             "thumbnailUrl": thumb,
             "on_platform_id": on_platform_id,
+            "duration": duration_int,
         }
 
         return payload
