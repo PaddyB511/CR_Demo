@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 
 from pathlib import Path
 import os
+import warnings
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -29,6 +30,19 @@ DEBUG = True
 ALLOWED_HOSTS = []
 
 
+AUTH0_DOMAIN = os.environ.get("AUTH0_DOMAIN", "dev-nx8affvie0a38544.eu.auth0.com")
+AUTH0_AUDIENCE_PLACEHOLDER = "https://example.com/api/"
+AUTH0_AUDIENCE = os.environ.get("AUTH0_AUDIENCE", AUTH0_AUDIENCE_PLACEHOLDER)
+
+if not os.environ.get("AUTH0_AUDIENCE"):
+    warnings.warn(
+        "AUTH0_AUDIENCE environment variable is not set; using the placeholder "
+        "value https://example.com/api/. Update your project-root .env file "
+        "(next to manage.py) so Django validates tokens against your Auth0 API Identifier.",
+        RuntimeWarning,
+    )
+
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -43,7 +57,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'django_filters',
     'backend.platform',
-    
+
     # Local apps
     'backend.users',
     'backend.videos',
@@ -128,8 +142,8 @@ JWT_AUTH = {
     'JWT_DECODE_HANDLER':
         'backend.utils.jwt_decode_token',
     'JWT_ALGORITHM': 'RS256',
-    'JWT_AUDIENCE': 'https://cr/api/',
-    'JWT_ISSUER': 'https://dev-t3crhfr5g3mrn5sk.eu.auth0.com/',
+    'JWT_AUDIENCE': AUTH0_AUDIENCE,
+    'JWT_ISSUER': f'https://{AUTH0_DOMAIN}/',
     'JWT_AUTH_HEADER_PREFIX': 'Bearer',
 }
 

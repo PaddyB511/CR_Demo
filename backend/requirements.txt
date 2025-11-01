@@ -15,3 +15,4 @@ urllib3===2.5.0
 python-docx===1.2.0
 webvtt-py===0.5.1
 yt-dlp===2025.9.26
+python-dotenv===1.0.1
