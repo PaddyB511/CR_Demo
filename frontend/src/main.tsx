@@ -10,7 +10,7 @@ import LogoutButton from "./components/Logout.tsx";
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <Auth0Provider
-      domain="dev-t3crhfr5g3mrn5sk.eu.auth0.com"
+      domain="dev-nx8affvie0a38544.eu.auth0.com"
       clientId="898hIqeuvUaKJUbMvTJTNUhJYMD0gA7G"
       authorizationParams={{
         redirect_uri: window.location.origin,

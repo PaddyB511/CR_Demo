@@ -10,7 +10,7 @@
     "deploy": "npm run build && git add -A && git commit -m 'Build for GH Pages' && git push origin main"
   },
   "dependencies": {
-    "@auth0/auth0-react": "^2.5.0",
+    "@auth0/auth0-react": "^2.8.0",
     "@tailwindcss/vite": "^4.1.13",
     "autoprefixer": "^10.4.21",
     "axios": "^1.12.2",

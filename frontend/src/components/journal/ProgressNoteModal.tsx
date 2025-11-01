@@ -34,7 +34,7 @@ export interface ProgressNoteFormData {
   hours: number;
   minutes: number;
   attentionRate: string;
-  inputComprehensibility: number;
+  inputComprehensibility: number | null;
   realityRates: string[];
   comment: string;
 }
@@ -48,7 +48,7 @@ const defaultForm: ProgressNoteFormData = {
   hours: 1,
   minutes: 0,
   attentionRate: attentionRateOptions[0].value,
-  inputComprehensibility: 70,
+  inputComprehensibility: null,
   realityRates: [realityRateOptions[2].value],
   comment: "",
 };
@@ -60,10 +60,10 @@ interface ProgressNoteModalProps {
 }
 
 const chipBaseClasses =
-  "inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-offset-1";
+  "inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-offset-1";
 
 const dateInputClasses =
-  "w-[126px] h-9 appearance-none rounded-xl border border-transparent bg-[#F6F6F6] px-3 text-sm font-inter text-[#9C9C9C] focus:border-[#DB0000] focus:bg-white focus:text-[#2B1A1A] focus:outline-none focus:ring-2 focus:ring-[#FAD4D4]";
+  "w-[126px] h-9 appearance-none rounded-xl border border-transparent bg-[#F6F6F6] px-3 text-sm font-inter text-[#9C9C9C] focus:border-[#DB0000] focus:outline-none focus:ring-2 focus:ring-[#FAD4D4]";
 
 const dateInputStyle: CSSProperties = {
   fontFamily: "'Inter', sans-serif",
@@ -71,7 +71,7 @@ const dateInputStyle: CSSProperties = {
 };
 
 const durationInputClasses =
-  "mt-1 w-[60px] border-none bg-transparent text-[15px] font-semibold text-black focus:outline-none";
+  "w-[40px] border-none bg-transparent text-sm font-semibold text-black focus:outline-none";
 
 export function ProgressNoteModal({ open, onClose, onSave }: ProgressNoteModalProps) {
   const [step, setStep] = useState<1 | 2>(1);
@@ -134,16 +134,23 @@ export function ProgressNoteModal({ open, onClose, onSave }: ProgressNoteModalPr
       }));
     };
 
+  const handleInputComprehensibilityChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const rawValue = event.target.value;
+    const numericValue = rawValue === "" ? null : Math.max(0, Math.min(100, Number(rawValue)));
+    if (Number.isNaN(numericValue ?? 0)) {
+      return;
+    }
+    setFormData((prev) => ({
+      ...prev,
+      inputComprehensibility: numericValue,
+    }));
+  };
+
   const toggleRealityRate = (value: string) => {
-    setFormData((prev) => {
-      const alreadySelected = prev.realityRates.includes(value);
-      return {
-        ...prev,
-        realityRates: alreadySelected
-          ? prev.realityRates.filter((item) => item !== value)
-          : [...prev.realityRates, value],
-      };
-    });
+    setFormData((prev) => ({
+      ...prev,
+      realityRates: prev.realityRates.includes(value) ? [] : [value],
+    }));
   };
 
   const handleSave = () => {
@@ -177,10 +184,9 @@ export function ProgressNoteModal({ open, onClose, onSave }: ProgressNoteModalPr
             <span className="text-lg">×</span>
           </button>
         </div>
-
         <div className="flex-1 overflow-y-auto px-6 pb-6 pt-5">
           <div className="mb-5 text-sm font-semibold text-[#FFB200]">
-            {step === 1 ? "Step 1/2. Activity" : "Step 2/2. Reflection"}
+            {step === 1 ? "Step 1/2. Activity" : "Step 2/2. Comment"}
           </div>
           {step === 1 ? (
             <div className="space-y-6">
@@ -196,8 +202,8 @@ export function ProgressNoteModal({ open, onClose, onSave }: ProgressNoteModalPr
                         key={option.value}
                         type="button"
                         onClick={() => handleRangeTypeChange(option.value)}
-                        className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-[#FFDEDE] focus:ring-offset-1 ${
-                          isActive ? "bg-[#FFDEDE] text-[#8F2F2F]" : "bg-transparent text-[#8F2F2F]/70"
+                        className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-colors focus:outline-none ${
+                          isActive ? "text-[#DB0000]" : "text-[#9C9C9C]"
                         }`}
                       >
                         <span className="inline-block h-2 w-2 rounded-full" style={{ backgroundColor: isActive ? "#DB0000" : "#FFD6D6" }} />
@@ -268,8 +274,7 @@ export function ProgressNoteModal({ open, onClose, onSave }: ProgressNoteModalPr
 
               <div className="space-y-3">
                 <div className="flex gap-3">
-                  <label className="flex flex-col rounded-xl border border-transparent bg-[#F6F6F6] px-3 py-[6px]">
-                    <span className="text-[11px] font-inter uppercase tracking-[0.1em] text-[#9C9C9C]">hrs</span>
+                  <label className="flex items-center rounded-xl border border-transparent bg-[#F6F6F6] px-3 py-[6px]">
                     <input
                       type="number"
                       min={0}
@@ -277,9 +282,9 @@ export function ProgressNoteModal({ open, onClose, onSave }: ProgressNoteModalPr
                       onChange={handleNumberChange("hours")}
                       className={durationInputClasses}
                     />
+                    <span className="ml-2 text-[11px] font-inter text-[#9C9C9C]">hrs</span>
                   </label>
-                  <label className="flex flex-col rounded-xl border border-transparent bg-[#F6F6F6] px-3 py-[6px]">
-                    <span className="text-[11px] font-inter uppercase tracking-[0.1em] text-[#9C9C9C]">mins</span>
+                  <label className="flex items-center rounded-xl border border-transparent bg-[#F6F6F6] px-3 py-[6px]">
                     <input
                       type="number"
                       min={0}
@@ -288,12 +293,13 @@ export function ProgressNoteModal({ open, onClose, onSave }: ProgressNoteModalPr
                       onChange={handleNumberChange("minutes")}
                       className={durationInputClasses}
                     />
+                    <span className="ml-2 text-[11px] font-inter text-[#9C9C9C]">mins</span>
                   </label>
                 </div>
               </div>
 
               <div className="space-y-3">
-                <div className="text-sm font-inter font-semibold text-[#8F2F2F]">Attention rate</div>
+                <div className="text-sm font-inter font-semibold text-black">Attention rate:</div>
                 <div className="flex flex-wrap gap-2">
                   {attentionRateOptions.map((option) => {
                     const isActive = formData.attentionRate === option.value;
@@ -302,8 +308,10 @@ export function ProgressNoteModal({ open, onClose, onSave }: ProgressNoteModalPr
                         key={option.value}
                         type="button"
                         onClick={() => setFormData((prev) => ({ ...prev, attentionRate: option.value }))}
-                        className={`${chipBaseClasses} border-[#FFDEDE] ${
-                          isActive ? "bg-[#FFDEDE] text-[#8F2F2F]" : "bg-white text-[#2B1A1A]"
+                        className={`${chipBaseClasses} ${
+                          isActive
+                            ? "bg-[#FDF0F0] text-[#DB0000]"
+                            : "bg-[#F6F6F6] text-[#9C9C9C]"
                         }`}
                       >
                         {option.label}
@@ -312,31 +320,29 @@ export function ProgressNoteModal({ open, onClose, onSave }: ProgressNoteModalPr
                   })}
                 </div>
               </div>
-
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-inter font-semibold text-[#8F2F2F]">Input comprehensibility</span>
-                  <span className="text-sm font-inter font-medium text-[#DB0000]">{formData.inputComprehensibility}%</span>
-                </div>
-                <input
-                  type="range"
-                  min={0}
-                  max={100}
-                  step={5}
-                  value={formData.inputComprehensibility}
-                  onChange={(event) =>
-                    setFormData((prev) => ({ ...prev, inputComprehensibility: Number(event.target.value) }))
-                  }
-                  className="w-full accent-[#DB0000]"
-                />
-                <div className="flex justify-between text-[11px] uppercase tracking-wide text-[#8F2F2F]/70">
-                  <span>0%</span>
-                  <span>100%</span>
+              <div className="space-y-2">
+                <div className="relative">
+                  <input
+                    type="number"
+                    min={0}
+                    max={100}
+                    value={formData.inputComprehensibility ?? ""}
+                    onChange={handleInputComprehensibilityChange}
+                    className="w-full rounded-xl border border-transparent bg-[#FDF0F0] px-4 py-3 pr-10 text-sm font-inter text-[#2B1A1A] placeholder-[#F7ACAC] focus:border-[#DB0000] focus:outline-none focus:ring-2 focus:ring-[#FAD4D4]"
+                  />
+                  {formData.inputComprehensibility === null && (
+                    <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-sm font-inter text-[#F7ACAC]">
+                      Input Comprehensibility
+                    </span>
+                  )}
+                  <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-sm font-inter font-semibold text-[#DB0000]">
+                    %
+                  </span>
                 </div>
               </div>
 
               <div className="space-y-3">
-                <div className="text-sm font-semibold text-black font-inter">Reality rate</div>
+                <div className="text-sm font-semibold text-black font-inter">Reality rate:</div>
                 <div className="grid grid-cols-1 gap-2">
                   {realityRateOptions.map((option) => {
                     const isActive = formData.realityRates.includes(option.value);
@@ -345,18 +351,13 @@ export function ProgressNoteModal({ open, onClose, onSave }: ProgressNoteModalPr
                         key={option.value}
                         type="button"
                         onClick={() => toggleRealityRate(option.value)}
-                        className={`flex items-center justify-between rounded-xl border border-transparent bg-[#F6F6F6] px-3 py-[7px] text-[13px] leading-[18px] font-inter transition ${
-                          isActive ? "ring-2 ring-[#DB0000] text-[#2B1A1A]" : "text-[#9C9C9C]"
+                        className={`flex items-center rounded-lg px-3 py-2 text-xs font-inter transition ${
+                          isActive
+                            ? "bg-[#FDF0F0] text-[#DB0000]"
+                            : "bg-[#F6F6F6] text-[#9C9C9C]"
                         }`}
                       >
-                        <span>{option.label}</span>
-                        <span
-                          className={`ml-3 grid h-6 w-6 place-items-center rounded-full border text-xs font-semibold ${
-                            isActive ? "border-[#DB0000] bg-[#DB0000] text-white" : "border-[#F6F6F6] bg-white text-[#C56B6B]"
-                          }`}
-                        >
-                          {isActive ? "✓" : "+"}
-                        </span>
+                        <span className="truncate">{option.label}</span>
                       </button>
                     );
                   })}
